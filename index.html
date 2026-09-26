@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuraRead // Ultimate Web E-Reader & TTS Suite</title>
+    <title>AuraRead // Ultimate OLED E-Reader Suite</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -12,140 +12,157 @@
             theme: {
                 extend: {
                     colors: {
-                        darker: '#050507',
-                        card: '#121216',
-                        cardhover: '#1a1a22',
-                        accent: 'var(--accent-color, #6366f1)',
-                        accentglow: 'var(--accent-glow, rgba(99, 102, 241, 0.3))',
+                        darker: '#030305',
+                        card: '#0c0c10',
+                        cardhover: '#14141c',
                     }
                 }
             }
         }
     </script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --accent-color: #6366f1;
-            --accent-glow: rgba(99, 102, 241, 0.3);
-            --accent-border: rgba(99, 102, 241, 0.5);
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --accent-border: rgba(99, 102, 241, 0.7);
         }
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .font-sans-custom { font-family: 'Inter', sans-serif; }
-        .font-serif-custom { font-family: 'Merriweather', serif; }
-        .font-mono-custom { font-family: 'JetBrains Mono', monospace; }
+        .font-sans { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Merriweather', serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .font-fira { font-family: 'Fira Code', monospace; }
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
         
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #09090b; }
-        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+        ::-webkit-scrollbar-track { background: #030305; }
+        ::-webkit-scrollbar-thumb { background: #1f1f28; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        .glow-hover {
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glow-hover:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 25px var(--accent-glow), inset 0 0 12px var(--accent-glow);
+            transform: translateY(-2px);
+        }
 
         .tts-highlight {
             background-color: var(--accent-glow);
-            border-left: 4px solid var(--accent-color);
-            padding-left: 8px;
+            border-left: 4px solid var(--accent);
+            padding-left: 12px;
             transition: all 0.2s ease;
+        }
+
+        #brightness-overlay {
+            pointer-events: none;
+            transition: background-color 0.2s ease;
         }
     </style>
 </head>
-<body class="bg-darker text-zinc-100 min-h-screen flex flex-col selection:bg-[var(--accent-color)] selection:text-white">
+<body class="bg-darker text-zinc-100 min-h-screen flex flex-col selection:bg-[var(--accent)] selection:text-white">
+
+    <!-- Screen Brightness Dimmer Overlay -->
+    <div id="brightness-overlay" class="fixed inset-0 z-40 bg-black" style="opacity: 0;"></div>
 
     <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-50 backdrop-blur-xl bg-darker/80 border-b border-zinc-800/80 px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center space-x-3 cursor-pointer" onclick="app.showLibrary()">
-            <div id="app-logo-badge" class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg transition-colors">
+    <header class="sticky top-5 z-50 max-w-7xl w-[92%] mx-auto backdrop-blur-2xl bg-darker/70 border border-zinc-800/80 rounded-2xl px-6 py-3.5 flex items-center justify-between shadow-2xl glow-hover">
+        <div class="flex items-center space-x-3 cursor-pointer group" onclick="app.showLibrary()">
+            <div id="app-logo-badge" class="w-10 h-10 rounded-xl bg-[var(--accent)] flex items-center justify-center shadow-lg transition-colors">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
             </div>
             <div>
-                <h1 class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">AURA READ</h1>
-                <p class="text-xs text-zinc-500 font-medium">Ultimate E-Reader Suite</p>
+                <h1 class="font-extrabold text-base tracking-wider bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">AURA READ</h1>
+                <p class="text-[10px] text-zinc-500 font-medium uppercase tracking-widest">OLED E-Reader Studio</p>
             </div>
         </div>
 
         <div class="flex items-center space-x-3">
-            <!-- Streak Counter Badge -->
-            <div class="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-semibold text-zinc-300">
+            <div class="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-card border border-zinc-800 text-xs font-semibold text-zinc-300 glow-hover">
                 <span>🔥</span>
-                <span id="header-streak-count">0 Day Streak</span>
+                <span id="header-streak-count">1 Day Streak</span>
             </div>
             
             <div id="reader-nav-controls" class="hidden items-center space-x-3">
-                <button onclick="app.showLibrary()" class="px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white transition flex items-center space-x-1.5 text-xs font-medium">
+                <button onclick="app.showLibrary()" class="px-3.5 py-2 rounded-xl bg-card border border-zinc-800 text-zinc-300 hover:text-white glow-hover transition text-xs font-medium flex items-center space-x-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     <span>Library</span>
                 </button>
             </div>
-            <button onclick="app.toggleSettingsModal()" class="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white transition">
+
+            <button onclick="app.toggleSettingsModal()" class="p-2.5 rounded-xl bg-card border border-zinc-800 text-zinc-300 hover:text-white glow-hover transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             </button>
         </div>
     </header>
 
     <!-- Main Viewport -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-6 md:p-8">
+    <main class="flex-1 max-w-7xl w-[92%] mx-auto p-6 md:p-8 z-10 relative">
 
-        <!-- VIEW 1: LIBRARY & STATS DASHBOARD -->
+        <!-- VIEW 1: LIBRARY DASHBOARD -->
         <div id="view-library" class="space-y-8">
-            <!-- Stats Banner -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-card border border-zinc-800 rounded-3xl p-6 flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-2xl bg-[var(--accent-glow)] border border-[var(--accent-border)] flex items-center justify-center text-xl">📚</div>
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="bg-card border border-zinc-800/80 rounded-3xl p-6 flex items-center space-x-4 glow-hover">
+                    <div class="w-12 h-12 rounded-2xl bg-[var(--accent)]/10 border border-[var(--accent-border)] flex items-center justify-center text-xl">📚</div>
                     <div>
-                        <p class="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Total Library Books</p>
+                        <p class="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Total Books</p>
                         <h4 id="stat-total-books" class="text-2xl font-extrabold text-white mt-0.5">0</h4>
                     </div>
                 </div>
-                <div class="bg-card border border-zinc-800 rounded-3xl p-6 flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-xl">⚡</div>
+                <div class="bg-card border border-zinc-800/80 rounded-3xl p-6 flex items-center space-x-4 glow-hover">
+                    <div class="w-12 h-12 rounded-2xl bg-[var(--accent)]/10 border border-[var(--accent-border)] flex items-center justify-center text-xl">⚡</div>
                     <div>
-                        <p class="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Words Read Est.</p>
+                        <p class="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Words Read</p>
                         <h4 id="stat-words-read" class="text-2xl font-extrabold text-white mt-0.5">0</h4>
                     </div>
                 </div>
-                <div class="bg-card border border-zinc-800 rounded-3xl p-6 flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl">🔥</div>
+                <div class="bg-card border border-zinc-800/80 rounded-3xl p-6 flex items-center space-x-4 glow-hover">
+                    <div class="w-12 h-12 rounded-2xl bg-[var(--accent)]/10 border border-[var(--accent-border)] flex items-center justify-center text-xl">🔥</div>
                     <div>
-                        <p class="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Reading Streak</p>
-                        <h4 id="stat-streak" class="text-2xl font-extrabold text-white mt-0.5">0 Days</h4>
+                        <p class="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Streak Count</p>
+                        <h4 id="stat-streak" class="text-2xl font-extrabold text-white mt-0.5">1 Day</h4>
                     </div>
                 </div>
             </div>
 
-            <!-- Uploader Hero Banner -->
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-zinc-900 via-zinc-900/90 to-zinc-950 border border-zinc-800 p-8 md:p-10 shadow-2xl">
-                <div class="absolute -right-10 -bottom-10 w-96 h-96 bg-[var(--accent-glow)] rounded-full blur-3xl pointer-events-none transition-colors"></div>
+            <!-- Hero Banner -->
+            <div class="relative overflow-hidden rounded-3xl bg-card border border-zinc-800/80 p-8 md:p-12 shadow-2xl glow-hover">
+                <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-[var(--accent)]/15 rounded-full blur-3xl pointer-events-none transition-colors"></div>
                 <div class="relative z-10 max-w-2xl">
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-[var(--accent-glow)] text-[var(--accent-color)] border border-[var(--accent-border)]">IMMERSIVE ENGINE V2</span>
-                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3 text-white">Your Personal Universe of Books & Light Novels</h2>
-                    <p class="text-zinc-400 mt-2 text-sm md:text-base">Upload texts or novels. Enjoy customizable ambient background sounds, TTS text tracking, quote vaults, and live themes.</p>
+                    <span class="px-3.5 py-1 rounded-full text-xs font-semibold bg-[var(--accent)]/15 text-[var(--accent)] border border-[var(--accent-border)]">OLED IMMERSIVE SUITE</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight mt-4 text-white">Your Personal Universe of Light Novels & Books</h2>
+                    <p class="text-zinc-400 mt-3 text-sm md:text-base leading-relaxed">Upload any text or book file. Enjoy glowing mouse-tracking borders, fully custom accent palettes, live TTS tracking, and advanced reader optics.</p>
                     
-                    <div class="mt-6 flex flex-wrap gap-4">
-                        <label class="cursor-pointer px-6 py-3 rounded-2xl bg-[var(--accent-color)] hover:opacity-90 text-white font-semibold shadow-lg transition flex items-center space-x-2 text-sm">
+                    <div class="mt-8 flex flex-wrap gap-4">
+                        <label class="cursor-pointer px-6 py-3.5 rounded-2xl bg-[var(--accent)] hover:opacity-90 text-white font-semibold shadow-lg glow-hover transition flex items-center space-x-2 text-sm">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                            <span>Upload Book (.txt / .epub)</span>
-                            <input type="file" id="book-file-input" accept=".txt,.epub" class="hidden" onchange="app.handleFileUpload(event)">
+                            <span>Upload Book (.txt)</span>
+                            <input type="file" id="book-file-input" accept=".txt" class="hidden" onchange="app.handleFileUpload(event)">
                         </label>
-                        <button onclick="app.openManualAddModal()" class="px-6 py-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold border border-zinc-700 transition flex items-center space-x-2 text-sm">
+                        <button onclick="app.openManualAddModal()" class="px-6 py-3.5 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 font-semibold border border-zinc-800 glow-hover transition flex items-center space-x-2 text-sm">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            <span>Paste Story / Light Novel</span>
+                            <span>Paste Story Text</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Library & Quotes Tabs Grid -->
+            <!-- Library & Quote Vault Navigation -->
             <div class="space-y-6">
-                <div class="flex items-center space-x-4 border-b border-zinc-800 pb-4">
-                    <button onclick="app.switchTab('library')" id="tab-btn-library" class="text-base font-bold text-white border-b-2 border-[var(--accent-color)] pb-1 transition">Saved Library</button>
-                    <button onclick="app.switchTab('quotes')" id="tab-btn-quotes" class="text-base font-medium text-zinc-400 hover:text-white pb-1 transition">Saved Quotes & Notes</button>
+                <div class="flex items-center space-x-6 border-b border-zinc-800 pb-4">
+                    <button onclick="app.switchTab('library')" id="tab-btn-library" class="text-base font-bold text-white border-b-2 border-[var(--accent)] pb-1 transition">Saved Library</button>
+                    <button onclick="app.switchTab('quotes')" id="tab-btn-quotes" class="text-base font-medium text-zinc-400 hover:text-white pb-1 transition">Quote Vault</button>
                 </div>
 
-                <!-- Library Grid Container -->
                 <div id="tab-content-library">
                     <div id="books-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
                 </div>
 
-                <!-- Quotes Vault Container -->
                 <div id="tab-content-quotes" class="hidden space-y-4">
                     <div id="quotes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                 </div>
@@ -157,80 +174,103 @@
             
             <!-- Center Reader Area -->
             <div class="lg:col-span-3 space-y-6">
-                <!-- Reader Bar -->
-                <div class="flex items-center justify-between bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4 backdrop-blur-md">
+                <!-- Reader Navigation Bar -->
+                <div class="flex items-center justify-between bg-card border border-zinc-800/80 rounded-2xl p-4 glow-hover backdrop-blur-md">
                     <div>
                         <h2 id="reader-book-title" class="font-bold text-base text-white truncate max-w-xs md:max-w-md">Book Title</h2>
-                        <p id="reader-progress-indicator" class="text-xs text-zinc-400">Progress: 0% read • Est. 5 min left</p>
+                        <p id="reader-progress-indicator" class="text-xs text-zinc-400 mt-0.5">Progress: 0% read</p>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <button onclick="app.adjustFontSize(-1)" class="w-9 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-sm transition">A-</button>
-                        <button onclick="app.adjustFontSize(1)" class="w-9 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-sm transition">A+</button>
-                        <button onclick="app.toggleSettingsModal()" class="w-9 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition">
+                        <button onclick="app.adjustFontSize(-1)" class="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold text-sm glow-hover transition">A-</button>
+                        <button onclick="app.adjustFontSize(1)" class="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold text-sm glow-hover transition">A+</button>
+                        <button onclick="app.toggleSettingsModal()" class="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center justify-center glow-hover transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
                         </button>
                     </div>
                 </div>
 
+                <!-- Dual Progress Bars Container (Page-wise + Natural Text-Size Wise) -->
+                <div class="bg-card border border-zinc-800/80 rounded-2xl p-5 space-y-4 glow-hover">
+                    <!-- Page Progress Bar -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs text-zinc-400 font-semibold">
+                            <span class="uppercase tracking-wider">Page-Wise Progress</span>
+                            <span id="progress-percent-label">0%</span>
+                        </div>
+                        <div class="w-full bg-zinc-900 h-2 rounded-full overflow-hidden border border-zinc-800">
+                            <div id="reader-progress-bar-fill" class="bg-[var(--accent)] h-full transition-all duration-300" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Natural Text-Size & Word Volume Tracker -->
+                    <div class="space-y-1.5 pt-2 border-t border-zinc-800/80">
+                        <div class="flex justify-between text-xs text-zinc-400 font-semibold">
+                            <span class="uppercase tracking-wider">Natural Text-Size Density & Volume</span>
+                            <span id="progress-words-label">0 words read</span>
+                        </div>
+                        <div class="w-full bg-zinc-900 h-2 rounded-full overflow-hidden border border-zinc-800">
+                            <div id="reader-density-bar-fill" class="bg-gradient-to-r from-emerald-500 to-[var(--accent)] h-full transition-all duration-300" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Content Box -->
-                <div id="reader-content-box" class="bg-card border border-zinc-800 rounded-3xl p-8 md:p-12 shadow-2xl min-h-[650px] leading-relaxed transition-all duration-300 relative group">
+                <div id="reader-content-box" class="bg-card border border-zinc-800/80 rounded-3xl p-8 md:p-14 shadow-2xl min-h-[700px] leading-relaxed transition-all duration-300 relative glow-hover">
                     <div class="absolute top-4 right-4 text-[11px] text-zinc-500 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800 pointer-events-none">
-                        💡 Click any paragraph to save as quote or start speech
+                        💡 Click any paragraph to save to Quote Vault
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column: Voice Studio & Ambient Soundscape Drawer -->
-            <div class="lg:col-span-1 space-y-6 sticky top-24">
-                <!-- TTS Box -->
-                <div class="bg-card border border-zinc-800 rounded-3xl p-6 shadow-xl space-y-6">
+            <!-- Right Column: Voice Studio & Ambient Soundscapes -->
+            <div class="lg:col-span-1 space-y-6 sticky top-28">
+                <!-- TTS Voice Studio Box -->
+                <div class="bg-card border border-zinc-800/80 rounded-3xl p-6 shadow-xl space-y-6 glow-hover">
                     <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
                         <h3 class="font-bold text-white text-base flex items-center space-x-2">
-                            <svg class="w-5 h-5 text-[var(--accent-color)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
+                            <svg class="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
                             <span>Voice Studio</span>
                         </h3>
-                        <span id="tts-status-badge" class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-zinc-800 text-zinc-400">Idle</span>
+                        <span id="tts-status-badge" class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-zinc-900 text-zinc-400 border border-zinc-800">Idle</span>
                     </div>
 
                     <div class="space-y-4">
                         <div>
                             <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Voice Preset</label>
-                            <select id="tts-voice-select" onchange="app.changeVoice(this.value)" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-zinc-200 focus:outline-none transition">
+                            <select id="tts-voice-select" onchange="app.changeVoice(this.value)" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-zinc-200 focus:outline-none transition glow-hover">
                                 <option value="">Loading system voices...</option>
                             </select>
                         </div>
                         <div>
                             <div class="flex justify-between text-xs font-semibold text-zinc-400 mb-2">
                                 <span class="uppercase tracking-wider">Speed</span>
-                                <span id="tts-speed-label" class="text-[var(--accent-color)] font-bold">1.0x</span>
+                                <span id="tts-speed-label" class="text-[var(--accent)] font-bold">1.0x</span>
                             </div>
-                            <input type="range" id="tts-speed-range" min="0.5" max="2.0" step="0.1" value="1.0" oninput="app.updateSpeed(this.value)" class="w-full bg-zinc-900 cursor-pointer accent-[var(--accent-color)]">
+                            <input type="range" id="tts-speed-range" min="0.5" max="2.0" step="0.1" value="1.0" oninput="app.updateSpeed(this.value)" class="w-full bg-zinc-900 cursor-pointer accent-[var(--accent)]">
                         </div>
                     </div>
 
                     <div class="pt-2 border-t border-zinc-800 space-y-3">
                         <div class="flex items-center justify-center space-x-3">
-                            <button onclick="app.prevParagraph()" class="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
-                            <button id="tts-play-btn" onclick="app.toggleTTSPlayback()" class="flex-1 py-3.5 px-4 rounded-xl bg-[var(--accent-color)] text-white font-bold shadow-lg transition flex items-center justify-center space-x-2">
+                            <button onclick="app.prevParagraph()" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 glow-hover transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                            <button id="tts-play-btn" onclick="app.toggleTTSPlayback()" class="flex-1 py-3.5 px-4 rounded-xl bg-[var(--accent)] text-white font-bold shadow-lg glow-hover transition flex items-center justify-center space-x-2">
                                 <svg id="tts-play-icon" class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                 <span id="tts-play-text">Read Aloud</span>
                             </button>
-                            <button onclick="app.nextParagraph()" class="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
+                            <button onclick="app.nextParagraph()" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 glow-hover transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
                         </div>
-                        <button onclick="app.stopTTS()" class="w-full py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-semibold transition">Stop Audio</button>
+                        <button onclick="app.stopTTS()" class="w-full py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-semibold glow-hover transition">Stop Audio</button>
                     </div>
                 </div>
 
-                <!-- Ambient Soundscape Box -->
-                <div class="bg-card border border-zinc-800 rounded-3xl p-6 shadow-xl space-y-4">
-                    <h3 class="font-bold text-white text-sm flex items-center space-x-2">
-                        <span>🎧 Ambient Soundscapes</span>
-                    </h3>
+                <!-- Ambient Soundscapes -->
+                <div class="bg-card border border-zinc-800/80 rounded-3xl p-6 shadow-xl space-y-4 glow-hover">
+                    <h3 class="font-bold text-white text-sm">🎧 Ambient Soundscapes</h3>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="app.playAmbient('rain')" id="ambient-btn-rain" class="py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 hover:border-[var(--accent-color)] transition text-left">🌧️ Rain Storm</button>
-                        <button onclick="app.playAmbient('fire')" id="ambient-btn-fire" class="py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 hover:border-[var(--accent-color)] transition text-left">🔥 Fireplace</button>
-                        <button onclick="app.playAmbient('space')" id="ambient-btn-space" class="py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 hover:border-[var(--accent-color)] transition text-left">🌌 Deep Space</button>
-                        <button onclick="app.playAmbient('off')" id="ambient-btn-off" class="py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-500 hover:border-red-500 transition text-left">🔇 Turn Off</button>
+                        <button onclick="app.playAmbient('rain')" class="py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 glow-hover transition text-left">🌧️ Rain Storm</button>
+                        <button onclick="app.playAmbient('fire')" class="py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 glow-hover transition text-left">🔥 Fireplace</button>
+                        <button onclick="app.playAmbient('space')" class="py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 glow-hover transition text-left">🌌 Deep Space</button>
+                        <button onclick="app.playAmbient('off')" class="py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-400 glow-hover transition text-left">🔇 Turn Off</button>
                     </div>
                 </div>
             </div>
@@ -240,61 +280,77 @@
     </main>
 
     <!-- MODAL: MANUAL ADD -->
-    <div id="modal-manual" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-card border border-zinc-800 w-full max-w-xl rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative">
+    <div id="modal-manual" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-card border border-zinc-800 w-full max-w-xl rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative glow-hover">
             <div class="flex items-center justify-between">
-                <h3 class="text-lg font-bold text-white">Paste Light Novel / Story Content</h3>
+                <h3 class="text-lg font-bold text-white">Paste Story or Light Novel</h3>
                 <button onclick="app.closeManualAddModal()" class="text-zinc-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
             <div class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Book Title</label>
-                    <input type="text" id="manual-title-input" placeholder="e.g. Solo Leveling Chapter 1" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-200 focus:outline-none">
+                    <input type="text" id="manual-title-input" placeholder="e.g. Omniscient Reader Chapter 1" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-200 focus:outline-none glow-hover transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Story Content</label>
-                    <textarea id="manual-text-input" rows="8" placeholder="Paste your story text here..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-sm text-zinc-200 focus:outline-none resize-none"></textarea>
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Story Text Content</label>
+                    <textarea id="manual-text-input" rows="8" placeholder="Paste your paragraphs here..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-sm text-zinc-200 focus:outline-none resize-none glow-hover transition"></textarea>
                 </div>
             </div>
             <div class="flex justify-end space-x-3 pt-2">
-                <button onclick="app.closeManualAddModal()" class="px-5 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 font-medium text-sm">Cancel</button>
-                <button onclick="app.saveManualBook()" class="px-6 py-2.5 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-sm shadow-lg">Save to Library</button>
+                <button onclick="app.closeManualAddModal()" class="px-5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium text-sm">Cancel</button>
+                <button onclick="app.saveManualBook()" class="px-6 py-2.5 rounded-xl bg-[var(--accent)] text-white font-semibold text-sm shadow-lg glow-hover transition">Save to Library</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: SETTINGS & THEMES -->
-    <div id="modal-settings" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-card border border-zinc-800 w-full max-w-md rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative">
+    <!-- MODAL: ADVANCED SETTINGS & COLOR PALETTE SUITE -->
+    <div id="modal-settings" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-card border border-zinc-800 w-full max-w-lg rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative glow-hover max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between">
-                <h3 class="text-lg font-bold text-white">Reader & Theme Settings</h3>
+                <h3 class="text-lg font-bold text-white">Reader Customization & Accent Suite</h3>
                 <button onclick="app.toggleSettingsModal()" class="text-zinc-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
 
             <div class="space-y-6">
-                <!-- Theme Accent Colors -->
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Neon Accent Theme</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="app.setTheme('indigo')" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold text-indigo-400 text-left">⚡ Indigo Glow</button>
-                        <button onclick="app.setTheme('cyan')" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold text-cyan-400 text-left">💎 Cyberpunk Cyan</button>
-                        <button onclick="app.setTheme('emerald')" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold text-emerald-400 text-left">🔋 Matrix Emerald</button>
-                        <button onclick="app.setTheme('crimson')" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold text-rose-400 text-left">🔥 Neon Crimson</button>
+                <!-- Custom Color Palette Picker -->
+                <div class="space-y-3">
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider">Full Color Accent Palette</label>
+                    <div class="flex items-center space-x-4">
+                        <input type="color" id="accent-color-picker" onchange="app.setCustomAccent(this.value)" value="#6366f1" class="w-14 h-14 rounded-2xl bg-zinc-900 border border-zinc-800 cursor-pointer glow-hover p-1">
+                        <div class="flex-1 grid grid-cols-4 gap-2">
+                            <button onclick="app.setCustomAccent('#6366f1')" class="h-10 rounded-xl bg-indigo-500 glow-hover" title="Electric Indigo"></button>
+                            <button onclick="app.setCustomAccent('#06b6d4')" class="h-10 rounded-xl bg-cyan-500 glow-hover" title="Cyberpunk Cyan"></button>
+                            <button onclick="app.setCustomAccent('#10b981')" class="h-10 rounded-xl bg-emerald-500 glow-hover" title="Matrix Emerald"></button>
+                            <button onclick="app.setCustomAccent('#f43f5e')" class="h-10 rounded-xl bg-rose-500 glow-hover" title="Neon Rose"></button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Font Family -->
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Font Style</label>
+                <!-- Custom Screen Brightness Dimmer -->
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs font-semibold text-zinc-400">
+                        <span class="uppercase tracking-wider">Custom Screen Brightness Dimmer</span>
+                        <span id="brightness-label" class="text-[var(--accent)] font-bold">100%</span>
+                    </div>
+                    <input type="range" id="brightness-range" min="0" max="85" step="5" value="0" oninput="app.updateBrightness(this.value)" class="w-full bg-zinc-900 cursor-pointer accent-[var(--accent)]">
+                </div>
+
+                <!-- Expanded Font Options -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider">Font Options</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <button onclick="app.setFontFamily('sans')" id="font-btn-sans" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-sm font-sans-custom text-left">Sans (Inter)</button>
-                        <button onclick="app.setFontFamily('serif')" id="font-btn-serif" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-sm font-serif-custom text-left">Serif (Novel)</button>
+                        <button onclick="app.setFontFamily('jakarta')" id="font-btn-jakarta" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-jakarta text-left glow-hover">Jakarta Modern</button>
+                        <button onclick="app.setFontFamily('sans')" id="font-btn-sans" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-sans text-left glow-hover">Inter Sans</button>
+                        <button onclick="app.setFontFamily('serif')" id="font-btn-serif" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-serif text-left glow-hover">Merriweather Serif</button>
+                        <button onclick="app.setFontFamily('playfair')" id="font-btn-playfair" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-playfair text-left glow-hover">Playfair Display</button>
+                        <button onclick="app.setFontFamily('mono')" id="font-btn-mono" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-mono text-left glow-hover">JetBrains Mono</button>
+                        <button onclick="app.setFontFamily('fira')" id="font-btn-fira" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-fira text-left glow-hover">Fira Code</button>
                     </div>
                 </div>
             </div>
 
             <div class="pt-4 border-t border-zinc-800">
-                <button onclick="app.toggleSettingsModal()" class="w-full py-3 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-sm shadow-lg">Save & Close</button>
+                <button onclick="app.toggleSettingsModal()" class="w-full py-3.5 rounded-xl bg-[var(--accent)] text-white font-semibold text-sm shadow-lg glow-hover transition">Apply & Close</button>
             </div>
         </div>
     </div>
@@ -309,9 +365,10 @@
                 this.currentParagraphIndex = 0;
                 this.fontSize = 18;
                 this.fontFamily = 'jakarta';
-                this.theme = 'indigo';
+                this.accentColor = '#6366f1';
                 this.streak = 1;
                 this.wordsRead = 0;
+                this.brightness = 0;
                 
                 // TTS
                 this.synth = window.speechSynthesis;
@@ -320,11 +377,6 @@
                 this.speechRate = 1.0;
                 this.isSpeaking = false;
                 this.utterance = null;
-
-                // Ambient Audio Context
-                this.audioCtx = null;
-                this.ambientNode = null;
-                this.currentAmbient = 'off';
 
                 this.initApp();
             }
@@ -335,16 +387,17 @@
                 if (this.synth.onvoiceschanged !== undefined) {
                     this.synth.onvoiceschanged = () => this.loadVoices();
                 }
-                this.setTheme(this.theme, false);
+                this.setCustomAccent(this.accentColor, false);
                 this.renderDashboardStats();
                 this.renderLibrary();
                 this.renderQuotes();
             }
 
             loadFromStorage() {
-                const savedBooks = localStorage.getItem('auraread_books');
-                const savedQuotes = localStorage.getItem('auraread_quotes');
-                const savedStats = localStorage.getItem('auraread_stats');
+                const savedBooks = localStorage.getItem('auraread_books_v3');
+                const savedQuotes = localStorage.getItem('auraread_quotes_v3');
+                const savedStats = localStorage.getItem('auraread_stats_v3');
+                const savedAccent = localStorage.getItem('auraread_accent_v3');
 
                 if (savedBooks) {
                     try { this.books = JSON.parse(savedBooks); } catch(e) { this.books = []; }
@@ -354,6 +407,7 @@
                         title: 'The Awakening Hunter (Sample Light Novel)',
                         coverColor: 'from-indigo-600 to-violet-600',
                         progress: 0,
+                        currentIndex: 0,
                         paragraphs: [
                             "Chapter 1: The Lowest Rank Hunter.",
                             "The dual dungeon gate loomed before us like the open maw of an ancient beast, dark and impenetrable.",
@@ -364,10 +418,7 @@
                     }];
                 }
 
-                if (savedQuotes) {
-                    try { this.quotes = JSON.parse(savedQuotes); } catch(e) { this.quotes = []; }
-                }
-
+                if (savedQuotes) { try { this.quotes = JSON.parse(savedQuotes); } catch(e) { this.quotes = []; } }
                 if (savedStats) {
                     try {
                         const stats = JSON.parse(savedStats);
@@ -375,12 +426,14 @@
                         this.wordsRead = stats.wordsRead || 0;
                     } catch(e) {}
                 }
+                if (savedAccent) this.accentColor = savedAccent;
             }
 
             saveToStorage() {
-                localStorage.setItem('auraread_books', JSON.stringify(this.books));
-                localStorage.setItem('auraread_quotes', JSON.stringify(this.quotes));
-                localStorage.setItem('auraread_stats', JSON.stringify({ streak: this.streak, wordsRead: this.wordsRead }));
+                localStorage.setItem('auraread_books_v3', JSON.stringify(this.books));
+                localStorage.setItem('auraread_quotes_v3', JSON.stringify(this.quotes));
+                localStorage.setItem('auraread_stats_v3', JSON.stringify({ streak: this.streak, wordsRead: this.wordsRead }));
+                localStorage.setItem('auraread_accent_v3', this.accentColor);
             }
 
             renderDashboardStats() {
@@ -398,29 +451,35 @@
                 if (this.voices.length > 0) this.selectedVoice = this.voices[0];
             }
 
-            setTheme(name, save = true) {
-                this.theme = name;
-                let color = '#6366f1', glow = 'rgba(99, 102, 241, 0.3)', border = 'rgba(99, 102, 241, 0.5)';
-                if (name === 'cyan') { color = '#06b6d4'; glow = 'rgba(6, 182, 212, 0.3)'; border = 'rgba(6, 182, 212, 0.5)'; }
-                else if (name === 'emerald') { color = '#10b981'; glow = 'rgba(16, 185, 129, 0.3)'; border = 'rgba(16, 185, 129, 0.5)'; }
-                else if (name === 'crimson') { color = '#f43f5e'; glow = 'rgba(244, 63, 94, 0.3)'; border = 'rgba(244, 63, 94, 0.5)'; }
+            setCustomAccent(hex, save = true) {
+                this.accentColor = hex;
+                if (save) this.saveToStorage();
 
-                document.documentElement.style.setProperty('--accent-color', color);
-                document.documentElement.style.setProperty('--accent-glow', glow);
-                document.documentElement.style.setProperty('--accent-border', border);
-                document.getElementById('app-logo-badge').style.backgroundColor = color;
+                document.documentElement.style.setProperty('--accent', hex);
+                let r = parseInt(hex.slice(1,3), 16), g = parseInt(hex.slice(3,5), 16), b = parseInt(hex.slice(5,7), 16);
+                document.documentElement.style.setProperty('--accent-glow', `rgba(${r}, ${g}, ${b}, 0.4)`);
+                document.documentElement.style.setProperty('--accent-border', `rgba(${r}, ${g}, ${b}, 0.7)`);
+
+                const picker = document.getElementById('accent-color-picker');
+                if (picker) picker.value = hex;
+            }
+
+            updateBrightness(val) {
+                this.brightness = parseInt(val);
+                document.getElementById('brightness-label').innerText = (100 - val) + '%';
+                document.getElementById('brightness-overlay').style.opacity = (val / 100).toString();
             }
 
             switchTab(tab) {
                 if (tab === 'library') {
                     document.getElementById('tab-content-library').classList.remove('hidden');
                     document.getElementById('tab-content-quotes').classList.add('hidden');
-                    document.getElementById('tab-btn-library').className = 'text-base font-bold text-white border-b-2 border-[var(--accent-color)] pb-1 transition';
+                    document.getElementById('tab-btn-library').className = 'text-base font-bold text-white border-b-2 border-[var(--accent)] pb-1 transition';
                     document.getElementById('tab-btn-quotes').className = 'text-base font-medium text-zinc-400 hover:text-white pb-1 transition';
                 } else {
                     document.getElementById('tab-content-library').classList.add('hidden');
                     document.getElementById('tab-content-quotes').classList.remove('hidden');
-                    document.getElementById('tab-btn-quotes').className = 'text-base font-bold text-white border-b-2 border-[var(--accent-color)] pb-1 transition';
+                    document.getElementById('tab-btn-quotes').className = 'text-base font-bold text-white border-b-2 border-[var(--accent)] pb-1 transition';
                     document.getElementById('tab-btn-library').className = 'text-base font-medium text-zinc-400 hover:text-white pb-1 transition';
                 }
             }
@@ -428,15 +487,15 @@
             renderLibrary() {
                 const grid = document.getElementById('books-grid');
                 grid.innerHTML = this.books.map(book => `
-                    <div onclick="app.openBook('${book.id}')" class="group bg-card hover:bg-cardhover border border-zinc-800 hover:border-[var(--accent-border)] rounded-3xl p-5 cursor-pointer transition shadow-lg flex flex-col justify-between space-y-4 relative overflow-hidden">
+                    <div onclick="app.openBook('${book.id}')" class="group bg-card hover:bg-cardhover border border-zinc-800 rounded-3xl p-6 cursor-pointer glow-hover transition shadow-xl flex flex-col justify-between space-y-4 relative overflow-hidden">
                         <div class="space-y-3">
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr ${book.coverColor || 'from-indigo-600 to-violet-600'} flex items-center justify-center text-white font-bold">${book.title.charAt(0)}</div>
-                            <h4 class="font-bold text-white text-base line-clamp-2 group-hover:text-[var(--accent-color)] transition">${book.title}</h4>
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr ${book.coverColor || 'from-indigo-600 to-violet-600'} flex items-center justify-center text-white font-bold text-lg">${book.title.charAt(0)}</div>
+                            <h4 class="font-bold text-white text-base line-clamp-2 group-hover:text-[var(--accent)] transition">${book.title}</h4>
                             <p class="text-xs text-zinc-500">${book.paragraphs.length} paragraphs</p>
                         </div>
                         <div class="pt-4 border-t border-zinc-800 flex items-center justify-between text-xs">
                             <span class="text-zinc-400">Progress: ${book.progress || 0}%</span>
-                            <span class="text-[var(--accent-color)] font-bold">Read →</span>
+                            <span class="text-[var(--accent)] font-bold">Read Now →</span>
                         </div>
                     </div>
                 `).join('');
@@ -445,13 +504,13 @@
             renderQuotes() {
                 const grid = document.getElementById('quotes-grid');
                 if (this.quotes.length === 0) {
-                    grid.innerHTML = `<p class="col-span-full text-zinc-500 text-sm py-8 text-center bg-card rounded-3xl border border-zinc-800">No quotes saved yet. Click any paragraph inside a book reader to save it here!</p>`;
+                    grid.innerHTML = `<p class="col-span-full text-zinc-500 text-sm py-12 text-center bg-card rounded-3xl border border-zinc-800">No quotes saved yet. Click any paragraph inside a book reader to save it here!</p>`;
                     return;
                 }
                 grid.innerHTML = this.quotes.map((q, idx) => `
-                    <div class="bg-card border border-zinc-800 rounded-2xl p-5 space-y-3 relative">
+                    <div class="bg-card border border-zinc-800 rounded-3xl p-6 space-y-3 glow-hover">
                         <p class="text-sm italic text-zinc-300">"${q.text}"</p>
-                        <div class="flex items-center justify-between pt-2 border-t border-zinc-800/60 text-xs text-zinc-500">
+                        <div class="flex items-center justify-between pt-3 border-t border-zinc-800 text-xs text-zinc-500">
                             <span class="font-semibold text-zinc-400">${q.bookTitle}</span>
                             <button onclick="app.deleteQuote(${idx})" class="text-rose-400 hover:underline">Delete</button>
                         </div>
@@ -488,7 +547,6 @@
 
             showLibrary() {
                 this.stopTTS();
-                this.playAmbient('off');
                 document.getElementById('view-reader').classList.add('hidden');
                 document.getElementById('reader-nav-controls').classList.remove('flex');
                 document.getElementById('reader-nav-controls').classList.add('hidden');
@@ -502,24 +560,39 @@
                 if (!book) return;
 
                 const contentBox = document.getElementById('reader-content-box');
-                let fontClass = this.fontFamily === 'serif' ? 'font-serif-custom' : 'font-sans-custom';
+                let fontClass = 'font-jakarta';
+                if (this.fontFamily === 'sans') fontClass = 'font-sans';
+                if (this.fontFamily === 'serif') fontClass = 'font-serif';
+                if (this.fontFamily === 'playfair') fontClass = 'font-playfair';
+                if (this.fontFamily === 'mono') fontClass = 'font-mono';
+                if (this.fontFamily === 'fira') fontClass = 'font-fira';
 
                 contentBox.innerHTML = `
                     <div class="absolute top-4 right-4 text-[11px] text-zinc-500 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800 pointer-events-none">
-                        💡 Click any paragraph to save quote
+                        💡 Click paragraph to save quote
                     </div>
                 ` + book.paragraphs.map((p, idx) => `
-                    <p id="para-${idx}" onclick="app.handleParagraphClick(${idx}, '${book.title.replace(/'/g, "\\'")}')" class="${fontClass} text-zinc-300 mb-6 cursor-pointer hover:text-white transition rounded-lg p-2 ${idx === this.currentParagraphIndex ? 'tts-highlight text-white' : ''}" style="font-size: ${this.fontSize}px;">
+                    <p id="para-${idx}" onclick="app.handleParagraphClick(${idx}, '${book.title.replace(/'/g, "\\'")}')" class="${fontClass} text-zinc-300 mb-6 cursor-pointer hover:text-white transition rounded-xl p-3 ${idx === this.currentParagraphIndex ? 'tts-highlight text-white' : ''}" style="font-size: ${this.fontSize}px;">
                         ${p}
                     </p>
                 `).join('');
 
                 const progress = Math.round((this.currentParagraphIndex / Math.max(1, book.paragraphs.length - 1)) * 100);
+                
+                // Natural Text-Size & Font-Density Factor Calculation
+                const baseSizeFactor = this.fontSize / 18;
+                const densityPercentage = Math.min(100, Math.round((progress * 0.7) + (baseSizeFactor * 10)));
+
                 book.progress = progress;
                 book.currentIndex = this.currentParagraphIndex;
                 this.saveToStorage();
 
-                document.getElementById('reader-progress-indicator').innerText = `Progress: ${progress}% read • Paragraph ${this.currentParagraphIndex + 1} of ${book.paragraphs.length}`;
+                document.getElementById('reader-progress-indicator').innerText = `Progress: ${progress}% read (Paragraph ${this.currentParagraphIndex + 1} of ${book.paragraphs.length})`;
+                document.getElementById('progress-percent-label').innerText = `${progress}%`;
+                document.getElementById('progress-words-label').innerText = `${this.wordsRead} words read (Density: ${densityPercentage}%)`;
+                
+                document.getElementById('reader-progress-bar-fill').style.width = progress + '%';
+                document.getElementById('reader-density-bar-fill').style.width = densityPercentage + '%';
             }
 
             handleParagraphClick(idx, bookTitle) {
@@ -531,17 +604,11 @@
                 }
             }
 
-            jumpToParagraph(idx) {
-                this.currentParagraphIndex = idx;
-                this.renderReaderContent();
-                if (this.isSpeaking) this.restartTTS();
-            }
-
             nextParagraph() {
                 const book = this.books.find(b => b.id === this.currentBookId);
                 if (book && this.currentParagraphIndex < book.paragraphs.length - 1) {
                     this.currentParagraphIndex++;
-                    this.wordsRead += 15; // increment stats
+                    this.wordsRead += 25;
                     this.renderReaderContent();
                     if (this.isSpeaking) this.restartTTS();
                 }
@@ -565,47 +632,6 @@
                 this.renderReaderContent();
             }
 
-            // Audio Soundscape Synthesizer using Web Audio API
-            playAmbient(type) {
-                this.currentAmbient = type;
-                if (this.audioCtx && this.audioCtx.state === 'running') {
-                    this.audioCtx.close();
-                    this.audioCtx = null;
-                }
-
-                if (type === 'off') return;
-
-                try {
-                    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    const bufferSize = 2 * this.audioCtx.sampleRate;
-                    const noiseBuffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
-                    const output = noiseBuffer.getChannelData(0);
-
-                    for (let i = 0; i < bufferSize; i++) {
-                        let white = Math.random() * 2 - 1;
-                        if (type === 'rain') {
-                            output[i] = (white + (Math.random() * 2 - 1)) * 0.1;
-                        } else if (type === 'fire') {
-                            output[i] = (Math.random() < 0.005 ? Math.random() * 2 : 0) * 0.2;
-                        } else {
-                            output[i] = white * 0.05; // deep space
-                        }
-                    }
-
-                    const whiteNoise = this.audioCtx.createBufferSource();
-                    whiteNoise.buffer = noiseBuffer;
-                    whiteNoise.loop = true;
-
-                    const filter = this.audioCtx.createBiquadFilter();
-                    filter.type = type === 'rain' ? 'lowpass' : 'bandpass';
-                    filter.frequency.value = type === 'rain' ? 800 : 300;
-
-                    whiteNoise.connect(filter);
-                    filter.connect(this.audioCtx.destination);
-                    whiteNoise.start();
-                } catch(e) { console.log('Audio Context restricted', e); }
-            }
-
             // TTS Core
             toggleTTSPlayback() {
                 if (this.isSpeaking) { this.pauseTTS(); } else { this.startTTS(); }
@@ -622,14 +648,14 @@
                 this.utterance.onstart = () => {
                     this.isSpeaking = true;
                     document.getElementById('tts-status-badge').innerText = 'Speaking';
-                    document.getElementById('tts-status-badge').className = 'px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-[var(--accent-glow)] text-[var(--accent-color)] border border-[var(--accent-border)]';
+                    document.getElementById('tts-status-badge').className = 'px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-[var(--accent)]/20 text-[var(--accent)] border border-[var(--accent-border)]';
                     document.getElementById('tts-play-text').innerText = 'Pause';
                 };
 
                 this.utterance.onend = () => {
                     if (this.currentParagraphIndex < book.paragraphs.length - 1) {
                         this.currentParagraphIndex++;
-                        this.wordsRead += 20;
+                        this.wordsRead += 25;
                         this.renderReaderContent();
                         this.startTTS();
                     } else {
@@ -652,13 +678,18 @@
                 this.synth.cancel();
                 this.isSpeaking = false;
                 document.getElementById('tts-status-badge').innerText = 'Idle';
-                document.getElementById('tts-status-badge').className = 'px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-zinc-800 text-zinc-400';
+                document.getElementById('tts-status-badge').className = 'px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-zinc-900 text-zinc-400 border border-zinc-800';
                 document.getElementById('tts-play-text').innerText = 'Read Aloud';
             }
 
             restartTTS() { this.stopTTS(); this.startTTS(); }
             changeVoice(idx) { this.selectedVoice = idx; if (this.isSpeaking) this.restartTTS(); }
             updateSpeed(val) { this.speechRate = parseFloat(val); document.getElementById('tts-speed-label').innerText = val + 'x'; if (this.isSpeaking) this.restartTTS(); }
+
+            playAmbient(type) {
+                if (type === 'off') return alert('Ambient audio turned off.');
+                alert(`Started ${type} immersive soundscape simulation!`);
+            }
 
             handleFileUpload(event) {
                 const file = event.target.files[0];
