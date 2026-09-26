@@ -15,81 +15,112 @@
                         darker: '#050507',
                         card: '#121216',
                         cardhover: '#1a1a22',
-                        accent: '#6366f1',
-                        accentglow: 'rgba(99, 102, 241, 0.3)',
+                        accent: 'var(--accent-color, #6366f1)',
+                        accentglow: 'var(--accent-glow, rgba(99, 102, 241, 0.3))',
                     }
                 }
             }
         }
     </script>
-    <!-- Google Fonts for custom styling -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --accent-color: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --accent-border: rgba(99, 102, 241, 0.5);
+        }
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .font-sans-custom { font-family: 'Inter', sans-serif; }
         .font-serif-custom { font-family: 'Merriweather', serif; }
         .font-mono-custom { font-family: 'JetBrains Mono', monospace; }
         
-        /* Custom Smooth Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #09090b; }
         ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
         .tts-highlight {
-            background-color: rgba(99, 102, 241, 0.25);
-            border-left: 4px solid #6366f1;
+            background-color: var(--accent-glow);
+            border-left: 4px solid var(--accent-color);
             padding-left: 8px;
             transition: all 0.2s ease;
         }
-        
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.2); }
-            50% { box-shadow: 0 0 25px rgba(99, 102, 241, 0.5); }
-        }
-        .glow-active { animation: pulseGlow 2s infinite; }
     </style>
 </head>
-<body class="bg-darker text-zinc-100 min-h-screen flex flex-col selection:bg-accent selection:text-white">
+<body class="bg-darker text-zinc-100 min-h-screen flex flex-col selection:bg-[var(--accent-color)] selection:text-white">
 
     <!-- Top Navigation Header -->
     <header class="sticky top-0 z-50 backdrop-blur-xl bg-darker/80 border-b border-zinc-800/80 px-6 py-4 flex items-center justify-between">
         <div class="flex items-center space-x-3 cursor-pointer" onclick="app.showLibrary()">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+            <div id="app-logo-badge" class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg transition-colors">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
             </div>
             <div>
                 <h1 class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">AURA READ</h1>
-                <p class="text-xs text-zinc-500 font-medium">Immersive E-Reader & TTS Engine</p>
+                <p class="text-xs text-zinc-500 font-medium">Ultimate E-Reader Suite</p>
             </div>
         </div>
 
-        <div id="reader-nav-controls" class="hidden items-center space-x-4">
-            <button onclick="app.showLibrary()" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 transition flex items-center space-x-2 text-sm font-medium">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                <span>Library</span>
-            </button>
-            <button onclick="app.toggleSettingsModal()" class="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 transition">
+        <div class="flex items-center space-x-3">
+            <!-- Streak Counter Badge -->
+            <div class="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-semibold text-zinc-300">
+                <span>🔥</span>
+                <span id="header-streak-count">0 Day Streak</span>
+            </div>
+            
+            <div id="reader-nav-controls" class="hidden items-center space-x-3">
+                <button onclick="app.showLibrary()" class="px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white transition flex items-center space-x-1.5 text-xs font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <span>Library</span>
+                </button>
+            </div>
+            <button onclick="app.toggleSettingsModal()" class="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             </button>
         </div>
     </header>
 
-    <!-- Main App Viewport Container -->
+    <!-- Main Viewport -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-6 md:p-8">
 
-        <!-- VIEW 1: LIBRARY DASHBOARD -->
+        <!-- VIEW 1: LIBRARY & STATS DASHBOARD -->
         <div id="view-library" class="space-y-8">
-            <!-- Welcome Banner & Uploader -->
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-zinc-900 via-zinc-900/90 to-indigo-950/40 border border-zinc-800 p-8 md:p-10 shadow-2xl">
-                <div class="absolute -right-10 -bottom-10 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <!-- Stats Banner -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-card border border-zinc-800 rounded-3xl p-6 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-2xl bg-[var(--accent-glow)] border border-[var(--accent-border)] flex items-center justify-center text-xl">📚</div>
+                    <div>
+                        <p class="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Total Library Books</p>
+                        <h4 id="stat-total-books" class="text-2xl font-extrabold text-white mt-0.5">0</h4>
+                    </div>
+                </div>
+                <div class="bg-card border border-zinc-800 rounded-3xl p-6 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-xl">⚡</div>
+                    <div>
+                        <p class="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Words Read Est.</p>
+                        <h4 id="stat-words-read" class="text-2xl font-extrabold text-white mt-0.5">0</h4>
+                    </div>
+                </div>
+                <div class="bg-card border border-zinc-800 rounded-3xl p-6 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl">🔥</div>
+                    <div>
+                        <p class="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Reading Streak</p>
+                        <h4 id="stat-streak" class="text-2xl font-extrabold text-white mt-0.5">0 Days</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Uploader Hero Banner -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-zinc-900 via-zinc-900/90 to-zinc-950 border border-zinc-800 p-8 md:p-10 shadow-2xl">
+                <div class="absolute -right-10 -bottom-10 w-96 h-96 bg-[var(--accent-glow)] rounded-full blur-3xl pointer-events-none transition-colors"></div>
                 <div class="relative z-10 max-w-2xl">
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">OLED IMMERSIVE ENGINE</span>
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-[var(--accent-glow)] text-[var(--accent-color)] border border-[var(--accent-border)]">IMMERSIVE ENGINE V2</span>
                     <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3 text-white">Your Personal Universe of Books & Light Novels</h2>
-                    <p class="text-zinc-400 mt-2 text-sm md:text-base">Upload EPUBs, text files, or light novels. Enjoy clean reading with custom voices, active speech tracking, and auto progress saving.</p>
+                    <p class="text-zinc-400 mt-2 text-sm md:text-base">Upload texts or novels. Enjoy customizable ambient background sounds, TTS text tracking, quote vaults, and live themes.</p>
                     
                     <div class="mt-6 flex flex-wrap gap-4">
-                        <label class="cursor-pointer px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-lg shadow-indigo-600/30 transition flex items-center space-x-2 text-sm">
+                        <label class="cursor-pointer px-6 py-3 rounded-2xl bg-[var(--accent-color)] hover:opacity-90 text-white font-semibold shadow-lg transition flex items-center space-x-2 text-sm">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                             <span>Upload Book (.txt / .epub)</span>
                             <input type="file" id="book-file-input" accept=".txt,.epub" class="hidden" onchange="app.handleFileUpload(event)">
@@ -102,97 +133,104 @@
                 </div>
             </div>
 
-            <!-- Library Books Grid -->
-            <div>
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-xl font-bold tracking-tight text-white flex items-center space-x-2">
-                        <span>Saved Library</span>
-                        <span id="book-count-badge" class="text-xs px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400">0</span>
-                    </h3>
+            <!-- Library & Quotes Tabs Grid -->
+            <div class="space-y-6">
+                <div class="flex items-center space-x-4 border-b border-zinc-800 pb-4">
+                    <button onclick="app.switchTab('library')" id="tab-btn-library" class="text-base font-bold text-white border-b-2 border-[var(--accent-color)] pb-1 transition">Saved Library</button>
+                    <button onclick="app.switchTab('quotes')" id="tab-btn-quotes" class="text-base font-medium text-zinc-400 hover:text-white pb-1 transition">Saved Quotes & Notes</button>
                 </div>
-                <div id="books-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <!-- Dynamic Books Injected Here -->
+
+                <!-- Library Grid Container -->
+                <div id="tab-content-library">
+                    <div id="books-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+                </div>
+
+                <!-- Quotes Vault Container -->
+                <div id="tab-content-quotes" class="hidden space-y-4">
+                    <div id="quotes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                 </div>
             </div>
         </div>
 
-        <!-- VIEW 2: READER & TTS WORKSPACE -->
+        <!-- VIEW 2: READER & AUDIO WORKSPACE -->
         <div id="view-reader" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
             
-            <!-- Left Column / Center: Main Reader Pane -->
+            <!-- Center Reader Area -->
             <div class="lg:col-span-3 space-y-6">
-                <!-- Reader Top Bar Controls -->
-                <div class="flex items-center justify-between bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-4 backdrop-blur-md">
+                <!-- Reader Bar -->
+                <div class="flex items-center justify-between bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4 backdrop-blur-md">
                     <div>
                         <h2 id="reader-book-title" class="font-bold text-base text-white truncate max-w-xs md:max-w-md">Book Title</h2>
-                        <p id="reader-progress-indicator" class="text-xs text-zinc-400">Progress: 0% read</p>
+                        <p id="reader-progress-indicator" class="text-xs text-zinc-400">Progress: 0% read • Est. 5 min left</p>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <button onclick="app.adjustFontSize(-1)" class="w-9 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center font-bold text-sm transition">A-</button>
-                        <button onclick="app.adjustFontSize(1)" class="w-9 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center font-bold text-sm transition">A+</button>
+                        <button onclick="app.adjustFontSize(-1)" class="w-9 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-sm transition">A-</button>
+                        <button onclick="app.adjustFontSize(1)" class="w-9 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-sm transition">A+</button>
                         <button onclick="app.toggleSettingsModal()" class="w-9 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
                         </button>
                     </div>
                 </div>
 
-                <!-- Book Content Display Area -->
-                <div id="reader-content-box" class="bg-card border border-zinc-800/80 rounded-3xl p-8 md:p-12 shadow-2xl min-h-[650px] leading-relaxed transition-all duration-300">
-                    <!-- Paragraphs injected dynamically here -->
+                <!-- Content Box -->
+                <div id="reader-content-box" class="bg-card border border-zinc-800 rounded-3xl p-8 md:p-12 shadow-2xl min-h-[650px] leading-relaxed transition-all duration-300 relative group">
+                    <div class="absolute top-4 right-4 text-[11px] text-zinc-500 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800 pointer-events-none">
+                        💡 Click any paragraph to save as quote or start speech
+                    </div>
                 </div>
             </div>
 
-            <!-- Right Column: Dedicated TTS Studio Drawer -->
+            <!-- Right Column: Voice Studio & Ambient Soundscape Drawer -->
             <div class="lg:col-span-1 space-y-6 sticky top-24">
-                <div class="bg-card border border-zinc-800/80 rounded-3xl p-6 shadow-xl space-y-6">
+                <!-- TTS Box -->
+                <div class="bg-card border border-zinc-800 rounded-3xl p-6 shadow-xl space-y-6">
                     <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
                         <h3 class="font-bold text-white text-base flex items-center space-x-2">
-                            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
-                            <span>Voice Studio (TTS)</span>
+                            <svg class="w-5 h-5 text-[var(--accent-color)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
+                            <span>Voice Studio</span>
                         </h3>
                         <span id="tts-status-badge" class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-zinc-800 text-zinc-400">Idle</span>
                     </div>
 
-                    <!-- Voice Profile Selectors -->
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Voice Preset (Male / Female)</label>
-                            <select id="tts-voice-select" onchange="app.changeVoice(this.value)" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition">
+                            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Voice Preset</label>
+                            <select id="tts-voice-select" onchange="app.changeVoice(this.value)" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-zinc-200 focus:outline-none transition">
                                 <option value="">Loading system voices...</option>
                             </select>
                         </div>
-
-                        <!-- Speed Controller -->
                         <div>
                             <div class="flex justify-between text-xs font-semibold text-zinc-400 mb-2">
-                                <span class="uppercase tracking-wider">Reading Speed</span>
-                                <span id="tts-speed-label" class="text-indigo-400 font-bold">1.0x</span>
+                                <span class="uppercase tracking-wider">Speed</span>
+                                <span id="tts-speed-label" class="text-[var(--accent-color)] font-bold">1.0x</span>
                             </div>
-                            <input type="range" id="tts-speed-range" min="0.5" max="2.0" step="0.1" value="1.0" oninput="app.updateSpeed(this.value)" class="w-full accent-indigo-500 bg-zinc-900 cursor-pointer">
+                            <input type="range" id="tts-speed-range" min="0.5" max="2.0" step="0.1" value="1.0" oninput="app.updateSpeed(this.value)" class="w-full bg-zinc-900 cursor-pointer accent-[var(--accent-color)]">
                         </div>
                     </div>
 
-                    <!-- Audio Master Playback Controls -->
                     <div class="pt-2 border-t border-zinc-800 space-y-3">
                         <div class="flex items-center justify-center space-x-3">
-                            <button onclick="app.prevParagraph()" title="Previous Block" class="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                            </button>
-                            <button id="tts-play-btn" onclick="app.toggleTTSPlayback()" class="flex-1 py-3.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-lg shadow-indigo-600/30 transition flex items-center justify-center space-x-2">
+                            <button onclick="app.prevParagraph()" class="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                            <button id="tts-play-btn" onclick="app.toggleTTSPlayback()" class="flex-1 py-3.5 px-4 rounded-xl bg-[var(--accent-color)] text-white font-bold shadow-lg transition flex items-center justify-center space-x-2">
                                 <svg id="tts-play-icon" class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                 <span id="tts-play-text">Read Aloud</span>
                             </button>
-                            <button onclick="app.nextParagraph()" title="Next Block" class="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                            </button>
+                            <button onclick="app.nextParagraph()" class="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
                         </div>
-                        <button onclick="app.stopTTS()" class="w-full py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-semibold transition">
-                            Stop & Reset Audio
-                        </button>
+                        <button onclick="app.stopTTS()" class="w-full py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-semibold transition">Stop Audio</button>
                     </div>
+                </div>
 
-                    <div class="text-[11px] text-zinc-500 bg-zinc-900/50 p-3 rounded-xl border border-zinc-800/50">
-                        💡 <span class="font-medium text-zinc-400">Live Highlight Active:</span> The reader automatically scrolls and highlights lines as speech progresses through paragraphs.
+                <!-- Ambient Soundscape Box -->
+                <div class="bg-card border border-zinc-800 rounded-3xl p-6 shadow-xl space-y-4">
+                    <h3 class="font-bold text-white text-sm flex items-center space-x-2">
+                        <span>🎧 Ambient Soundscapes</span>
+                    </h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="app.playAmbient('rain')" id="ambient-btn-rain" class="py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 hover:border-[var(--accent-color)] transition text-left">🌧️ Rain Storm</button>
+                        <button onclick="app.playAmbient('fire')" id="ambient-btn-fire" class="py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 hover:border-[var(--accent-color)] transition text-left">🔥 Fireplace</button>
+                        <button onclick="app.playAmbient('space')" id="ambient-btn-space" class="py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 hover:border-[var(--accent-color)] transition text-left">🌌 Deep Space</button>
+                        <button onclick="app.playAmbient('off')" id="ambient-btn-off" class="py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-500 hover:border-red-500 transition text-left">🔇 Turn Off</button>
                     </div>
                 </div>
             </div>
@@ -201,67 +239,62 @@
 
     </main>
 
-    <!-- MODAL: MANUAL ADD / PASTE NOVEL -->
+    <!-- MODAL: MANUAL ADD -->
     <div id="modal-manual" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="bg-card border border-zinc-800 w-full max-w-xl rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-bold text-white">Paste Light Novel / Story Content</h3>
-                <button onclick="app.closeManualAddModal()" class="text-zinc-400 hover:text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <button onclick="app.closeManualAddModal()" class="text-zinc-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
             <div class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Book Title</label>
-                    <input type="text" id="manual-title-input" placeholder="e.g. Solo Leveling Chapter 1" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="manual-title-input" placeholder="e.g. Solo Leveling Chapter 1" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-200 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Story Text Content</label>
-                    <textarea id="manual-text-input" rows="8" placeholder="Paste chapters, paragraphs, or light novel content here..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Story Content</label>
+                    <textarea id="manual-text-input" rows="8" placeholder="Paste your story text here..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-sm text-zinc-200 focus:outline-none resize-none"></textarea>
                 </div>
             </div>
             <div class="flex justify-end space-x-3 pt-2">
-                <button onclick="app.closeManualAddModal()" class="px-5 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 font-medium text-sm hover:bg-zinc-700 transition">Cancel</button>
-                <button onclick="app.saveManualBook()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 transition">Save to Library</button>
+                <button onclick="app.closeManualAddModal()" class="px-5 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 font-medium text-sm">Cancel</button>
+                <button onclick="app.saveManualBook()" class="px-6 py-2.5 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-sm shadow-lg">Save to Library</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: READER CUSTOMIZATION SETTINGS -->
+    <!-- MODAL: SETTINGS & THEMES -->
     <div id="modal-settings" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="bg-card border border-zinc-800 w-full max-w-md rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative">
             <div class="flex items-center justify-between">
-                <h3 class="text-lg font-bold text-white">Reader Customization</h3>
-                <button onclick="app.toggleSettingsModal()" class="text-zinc-400 hover:text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <h3 class="text-lg font-bold text-white">Reader & Theme Settings</h3>
+                <button onclick="app.toggleSettingsModal()" class="text-zinc-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
 
             <div class="space-y-6">
-                <!-- Font Family Selection -->
+                <!-- Theme Accent Colors -->
                 <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Font Style</label>
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Neon Accent Theme</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <button onclick="app.setFontFamily('sans')" id="font-btn-sans" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-sm font-sans-custom text-left hover:border-indigo-500 transition">Sans (Inter)</button>
-                        <button onclick="app.setFontFamily('serif')" id="font-btn-serif" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-sm font-serif-custom text-left hover:border-indigo-500 transition">Serif (Novel)</button>
-                        <button onclick="app.setFontFamily('mono')" id="font-btn-mono" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-sm font-mono-custom text-left hover:border-indigo-500 transition">Mono (Code)</button>
-                        <button onclick="app.setFontFamily('jakarta')" id="font-btn-jakarta" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-left hover:border-indigo-500 transition">Jakarta Modern</button>
+                        <button onclick="app.setTheme('indigo')" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold text-indigo-400 text-left">⚡ Indigo Glow</button>
+                        <button onclick="app.setTheme('cyan')" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold text-cyan-400 text-left">💎 Cyberpunk Cyan</button>
+                        <button onclick="app.setTheme('emerald')" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold text-emerald-400 text-left">🔋 Matrix Emerald</button>
+                        <button onclick="app.setTheme('crimson')" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold text-rose-400 text-left">🔥 Neon Crimson</button>
                     </div>
                 </div>
 
-                <!-- Text Width Adjuster -->
+                <!-- Font Family -->
                 <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Reading Content Width</label>
-                    <div class="flex space-x-2">
-                        <button onclick="app.setContentWidth('max-w-2xl')" class="flex-1 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-semibold text-zinc-300 hover:border-indigo-500 transition">Narrow</button>
-                        <button onclick="app.setContentWidth('max-w-4xl')" class="flex-1 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-semibold text-zinc-300 hover:border-indigo-500 transition">Medium</button>
-                        <button onclick="app.setContentWidth('max-w-7xl')" class="flex-1 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-semibold text-zinc-300 hover:border-indigo-500 transition">Full Wide</button>
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Font Style</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="app.setFontFamily('sans')" id="font-btn-sans" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-sm font-sans-custom text-left">Sans (Inter)</button>
+                        <button onclick="app.setFontFamily('serif')" id="font-btn-serif" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-sm font-serif-custom text-left">Serif (Novel)</button>
                     </div>
                 </div>
             </div>
 
             <div class="pt-4 border-t border-zinc-800">
-                <button onclick="app.toggleSettingsModal()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 transition">Apply Changes</button>
+                <button onclick="app.toggleSettingsModal()" class="w-full py-3 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-sm shadow-lg">Save & Close</button>
             </div>
         </div>
     </div>
@@ -271,20 +304,27 @@
         class EReaderApp {
             constructor() {
                 this.books = [];
+                this.quotes = [];
                 this.currentBookId = null;
                 this.currentParagraphIndex = 0;
-                this.fontSize = 18; // px
+                this.fontSize = 18;
                 this.fontFamily = 'jakarta';
-                this.contentWidth = 'max-w-4xl';
+                this.theme = 'indigo';
+                this.streak = 1;
+                this.wordsRead = 0;
                 
-                // TTS Variables
+                // TTS
                 this.synth = window.speechSynthesis;
                 this.voices = [];
                 this.selectedVoice = null;
                 this.speechRate = 1.0;
                 this.isSpeaking = false;
-                this.isPaused = false;
                 this.utterance = null;
+
+                // Ambient Audio Context
+                this.audioCtx = null;
+                this.ambientNode = null;
+                this.currentAmbient = 'off';
 
                 this.initApp();
             }
@@ -292,152 +332,168 @@
             initApp() {
                 this.loadFromStorage();
                 this.loadVoices();
-                if (speechSynthesis.onvoiceschanged !== undefined) {
-                    speechSynthesis.onvoiceschanged = () => this.loadVoices();
+                if (this.synth.onvoiceschanged !== undefined) {
+                    this.synth.onvoiceschanged = () => this.loadVoices();
                 }
+                this.setTheme(this.theme, false);
+                this.renderDashboardStats();
                 this.renderLibrary();
+                this.renderQuotes();
             }
 
             loadFromStorage() {
-                const saved = localStorage.getItem('auraread_books');
-                if (saved) {
-                    try {
-                        this.books = JSON.parse(saved);
-                    } catch(e) { this.books = []; }
+                const savedBooks = localStorage.getItem('auraread_books');
+                const savedQuotes = localStorage.getItem('auraread_quotes');
+                const savedStats = localStorage.getItem('auraread_stats');
+
+                if (savedBooks) {
+                    try { this.books = JSON.parse(savedBooks); } catch(e) { this.books = []; }
                 } else {
-                    // Seed initial sample book if first time visiting
-                    this.books = [
-                        {
-                            id: 'sample-1',
-                            title: 'The Awakening Hunter (Light Novel Sample)',
-                            coverColor: 'from-indigo-600 to-violet-600',
-                            progress: 0,
-                            paragraphs: [
-                                "Chapter 1: The Lowest Rank Hunter.",
-                                "The dual dungeon gate loomed before us like the open maw of an ancient beast, dark and impenetrable. Inside whispered secrets of forgotten floors and untold treasures.",
-                                "I gripped my rusty dagger tightly, knuckles turning stark white. As an E-rank hunter, people called me the weakest weapon of humanity. But they didn't know what I knew.",
-                                "A strange blue holographic notification flickered directly across my retina, visible only to my eyes.",
-                                "[ You have met all the secret requirements of the hidden temple. Do you wish to accept the Quest of the Monarch? ]",
-                                "My heart hammered against my ribs like a caged bird. Without hesitation, in the chilling silence of the cavern, I whispered my choice into the dark: 'Accept.'"
-                            ]
-                        }
-                    ];
-                    this.saveToStorage();
+                    this.books = [{
+                        id: 'sample-1',
+                        title: 'The Awakening Hunter (Sample Light Novel)',
+                        coverColor: 'from-indigo-600 to-violet-600',
+                        progress: 0,
+                        paragraphs: [
+                            "Chapter 1: The Lowest Rank Hunter.",
+                            "The dual dungeon gate loomed before us like the open maw of an ancient beast, dark and impenetrable.",
+                            "I gripped my rusty dagger tightly, knuckles turning stark white as an E-rank hunter.",
+                            "[ You have met all the secret requirements of the hidden temple. Do you wish to accept the Quest of the Monarch? ]",
+                            "Without hesitation, in the chilling silence of the cavern, I whispered my choice: 'Accept.'"
+                        ]
+                    }];
+                }
+
+                if (savedQuotes) {
+                    try { this.quotes = JSON.parse(savedQuotes); } catch(e) { this.quotes = []; }
+                }
+
+                if (savedStats) {
+                    try {
+                        const stats = JSON.parse(savedStats);
+                        this.streak = stats.streak || 1;
+                        this.wordsRead = stats.wordsRead || 0;
+                    } catch(e) {}
                 }
             }
 
             saveToStorage() {
                 localStorage.setItem('auraread_books', JSON.stringify(this.books));
+                localStorage.setItem('auraread_quotes', JSON.stringify(this.quotes));
+                localStorage.setItem('auraread_stats', JSON.stringify({ streak: this.streak, wordsRead: this.wordsRead }));
+            }
+
+            renderDashboardStats() {
+                document.getElementById('stat-total-books').innerText = this.books.length;
+                document.getElementById('stat-words-read').innerText = this.wordsRead.toLocaleString();
+                document.getElementById('stat-streak').innerText = this.streak + ' Days';
+                document.getElementById('header-streak-count').innerText = this.streak + ' Day Streak';
             }
 
             loadVoices() {
                 this.voices = this.synth.getVoices();
                 const select = document.getElementById('tts-voice-select');
-                select.innerHTML = '';
-
-                if (this.voices.length === 0) {
-                    select.innerHTML = '<option value="">Default Browser Voice</option>';
-                    return;
-                }
-
-                // Filter or categorize voices for English or general
-                let html = '';
-                this.voices.forEach((voice, index) => {
-                    const isFemale = voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('zira') || voice.name.toLowerCase().includes('samantha') || voice.name.toLowerCase().includes('victoria') || voice.name.toLowerCase().includes('google uk english female');
-                    const isMale = voice.name.toLowerCase().includes('male') || voice.name.toLowerCase().includes('david') || voice.name.toLowerCase().includes('george') || voice.name.toLowerCase().includes('daniel');
-                    
-                    let badge = 'Neutral';
-                    if (isFemale) badge = '👩 Female';
-                    else if (isMale) badge = '👨 Male';
-
-                    html += `<option value="${index}">${badge} - ${voice.name} (${voice.lang})</option>`;
-                });
-
-                select.innerHTML = html;
-                if (this.voices.length > 0) {
-                    this.selectedVoice = this.voices[0];
-                }
+                if (!select) return;
+                select.innerHTML = this.voices.map((v, i) => `<option value="${i}">${v.name} (${v.lang})</option>`).join('');
+                if (this.voices.length > 0) this.selectedVoice = this.voices[0];
             }
 
-            changeVoice(index) {
-                if (this.voices[index]) {
-                    this.selectedVoice = this.voices[index];
-                    if (this.isSpeaking) {
-                        this.restartTTS();
-                    }
-                }
+            setTheme(name, save = true) {
+                this.theme = name;
+                let color = '#6366f1', glow = 'rgba(99, 102, 241, 0.3)', border = 'rgba(99, 102, 241, 0.5)';
+                if (name === 'cyan') { color = '#06b6d4'; glow = 'rgba(6, 182, 212, 0.3)'; border = 'rgba(6, 182, 212, 0.5)'; }
+                else if (name === 'emerald') { color = '#10b981'; glow = 'rgba(16, 185, 129, 0.3)'; border = 'rgba(16, 185, 129, 0.5)'; }
+                else if (name === 'crimson') { color = '#f43f5e'; glow = 'rgba(244, 63, 94, 0.3)'; border = 'rgba(244, 63, 94, 0.5)'; }
+
+                document.documentElement.style.setProperty('--accent-color', color);
+                document.documentElement.style.setProperty('--accent-glow', glow);
+                document.documentElement.style.setProperty('--accent-border', border);
+                document.getElementById('app-logo-badge').style.backgroundColor = color;
             }
 
-            updateSpeed(val) {
-                this.speechRate = parseFloat(val);
-                document.getElementById('tts-speed-label').innerText = val + 'x';
-                if (this.isSpeaking) {
-                    this.restartTTS();
+            switchTab(tab) {
+                if (tab === 'library') {
+                    document.getElementById('tab-content-library').classList.remove('hidden');
+                    document.getElementById('tab-content-quotes').classList.add('hidden');
+                    document.getElementById('tab-btn-library').className = 'text-base font-bold text-white border-b-2 border-[var(--accent-color)] pb-1 transition';
+                    document.getElementById('tab-btn-quotes').className = 'text-base font-medium text-zinc-400 hover:text-white pb-1 transition';
+                } else {
+                    document.getElementById('tab-content-library').classList.add('hidden');
+                    document.getElementById('tab-content-quotes').classList.remove('hidden');
+                    document.getElementById('tab-btn-quotes').className = 'text-base font-bold text-white border-b-2 border-[var(--accent-color)] pb-1 transition';
+                    document.getElementById('tab-btn-library').className = 'text-base font-medium text-zinc-400 hover:text-white pb-1 transition';
                 }
-            }
-
-            restartTTS() {
-                this.stopTTS();
-                this.startTTS();
             }
 
             renderLibrary() {
                 const grid = document.getElementById('books-grid');
-                document.getElementById('book-count-badge').innerText = this.books.length;
-                
-                if (this.books.length === 0) {
-                    grid.innerHTML = `
-                        <div class="col-span-full py-16 text-center text-zinc-500 bg-zinc-900/30 rounded-3xl border border-zinc-800/60">
-                            <p class="font-medium">No books in your library yet.</p>
-                            <p class="text-xs mt-1">Upload a file or paste a story above to get started!</p>
-                        </div>
-                    `;
-                    return;
-                }
-
                 grid.innerHTML = this.books.map(book => `
-                    <div onclick="app.openBook('${book.id}')" class="group bg-card hover:bg-cardhover border border-zinc-800/80 hover:border-indigo-500/50 rounded-3xl p-5 cursor-pointer transition-all duration-300 shadow-lg flex flex-col justify-between space-y-4 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition"></div>
-                        <div class="space-y-3 relative z-10">
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr ${book.coverColor || 'from-indigo-600 to-violet-600'} flex items-center justify-center shadow-md shadow-indigo-600/20 text-white font-bold text-lg">
-                                ${book.title.charAt(0).toUpperCase()}
-                            </div>
-                            <h4 class="font-bold text-white text-base line-clamp-2 group-hover:text-indigo-400 transition">${book.title}</h4>
+                    <div onclick="app.openBook('${book.id}')" class="group bg-card hover:bg-cardhover border border-zinc-800 hover:border-[var(--accent-border)] rounded-3xl p-5 cursor-pointer transition shadow-lg flex flex-col justify-between space-y-4 relative overflow-hidden">
+                        <div class="space-y-3">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr ${book.coverColor || 'from-indigo-600 to-violet-600'} flex items-center justify-center text-white font-bold">${book.title.charAt(0)}</div>
+                            <h4 class="font-bold text-white text-base line-clamp-2 group-hover:text-[var(--accent-color)] transition">${book.title}</h4>
                             <p class="text-xs text-zinc-500">${book.paragraphs.length} paragraphs</p>
                         </div>
-                        <div class="relative z-10 pt-4 border-t border-zinc-800/80 flex items-center justify-between text-xs">
-                            <span class="text-zinc-400 font-medium">Progress: ${book.progress || 0}%</span>
-                            <span class="text-indigo-400 font-bold group-hover:translate-x-1 transition flex items-center space-x-1">
-                                <span>Read</span>
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                            </span>
+                        <div class="pt-4 border-t border-zinc-800 flex items-center justify-between text-xs">
+                            <span class="text-zinc-400">Progress: ${book.progress || 0}%</span>
+                            <span class="text-[var(--accent-color)] font-bold">Read →</span>
                         </div>
                     </div>
                 `).join('');
+            }
+
+            renderQuotes() {
+                const grid = document.getElementById('quotes-grid');
+                if (this.quotes.length === 0) {
+                    grid.innerHTML = `<p class="col-span-full text-zinc-500 text-sm py-8 text-center bg-card rounded-3xl border border-zinc-800">No quotes saved yet. Click any paragraph inside a book reader to save it here!</p>`;
+                    return;
+                }
+                grid.innerHTML = this.quotes.map((q, idx) => `
+                    <div class="bg-card border border-zinc-800 rounded-2xl p-5 space-y-3 relative">
+                        <p class="text-sm italic text-zinc-300">"${q.text}"</p>
+                        <div class="flex items-center justify-between pt-2 border-t border-zinc-800/60 text-xs text-zinc-500">
+                            <span class="font-semibold text-zinc-400">${q.bookTitle}</span>
+                            <button onclick="app.deleteQuote(${idx})" class="text-rose-400 hover:underline">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            saveQuote(text, bookTitle) {
+                this.quotes.unshift({ text, bookTitle });
+                this.saveToStorage();
+                this.renderQuotes();
+                alert('Quote saved to your vault!');
+            }
+
+            deleteQuote(idx) {
+                this.quotes.splice(idx, 1);
+                this.saveToStorage();
+                this.renderQuotes();
             }
 
             openBook(id) {
                 this.currentBookId = id;
                 const book = this.books.find(b => b.id === id);
                 if (!book) return;
-
                 this.currentParagraphIndex = book.currentIndex || 0;
 
                 document.getElementById('view-library').classList.add('hidden');
                 document.getElementById('view-reader').classList.remove('hidden');
                 document.getElementById('reader-nav-controls').classList.remove('hidden');
                 document.getElementById('reader-nav-controls').classList.add('flex');
-
                 document.getElementById('reader-book-title').innerText = book.title;
                 this.renderReaderContent();
             }
 
             showLibrary() {
                 this.stopTTS();
+                this.playAmbient('off');
                 document.getElementById('view-reader').classList.add('hidden');
                 document.getElementById('reader-nav-controls').classList.remove('flex');
                 document.getElementById('reader-nav-controls').classList.add('hidden');
                 document.getElementById('view-library').classList.remove('hidden');
+                this.renderDashboardStats();
                 this.renderLibrary();
             }
 
@@ -446,50 +502,48 @@
                 if (!book) return;
 
                 const contentBox = document.getElementById('reader-content-box');
-                contentBox.className = `bg-card border border-zinc-800/80 rounded-3xl p-8 md:p-12 shadow-2xl min-h-[650px] leading-relaxed transition-all duration-300 mx-auto ${this.contentWidth}`;
-                
-                let fontClass = 'font-sans-custom';
-                if (this.fontFamily === 'serif') fontClass = 'font-serif-custom';
-                if (this.fontFamily === 'mono') fontClass = 'font-mono-custom';
+                let fontClass = this.fontFamily === 'serif' ? 'font-serif-custom' : 'font-sans-custom';
 
-                contentBox.innerHTML = book.paragraphs.map((p, idx) => `
-                    <p id="para-${idx}" onclick="app.jumpToParagraph(${idx})" class="${fontClass} text-zinc-300 mb-6 cursor-pointer hover:text-white transition rounded-lg p-2 ${idx === this.currentParagraphIndex ? 'tts-highlight text-white' : ''}" style="font-size: ${this.fontSize}px;">
+                contentBox.innerHTML = `
+                    <div class="absolute top-4 right-4 text-[11px] text-zinc-500 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800 pointer-events-none">
+                        💡 Click any paragraph to save quote
+                    </div>
+                ` + book.paragraphs.map((p, idx) => `
+                    <p id="para-${idx}" onclick="app.handleParagraphClick(${idx}, '${book.title.replace(/'/g, "\\'")}')" class="${fontClass} text-zinc-300 mb-6 cursor-pointer hover:text-white transition rounded-lg p-2 ${idx === this.currentParagraphIndex ? 'tts-highlight text-white' : ''}" style="font-size: ${this.fontSize}px;">
                         ${p}
                     </p>
                 `).join('');
 
-                // Calculate progress
                 const progress = Math.round((this.currentParagraphIndex / Math.max(1, book.paragraphs.length - 1)) * 100);
                 book.progress = progress;
                 book.currentIndex = this.currentParagraphIndex;
                 this.saveToStorage();
 
-                document.getElementById('reader-progress-indicator').innerText = `Progress: ${progress}% read (Paragraph ${this.currentParagraphIndex + 1} of ${book.paragraphs.length})`;
-                
-                // Smooth scroll active paragraph into view if reading
-                const activeEl = document.getElementById(`para-${this.currentParagraphIndex}`);
-                if (activeEl) {
-                    activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                document.getElementById('reader-progress-indicator').innerText = `Progress: ${progress}% read • Paragraph ${this.currentParagraphIndex + 1} of ${book.paragraphs.length}`;
+            }
+
+            handleParagraphClick(idx, bookTitle) {
+                const book = this.books.find(b => b.id === this.currentBookId);
+                if (book && book.paragraphs[idx]) {
+                    if (confirm('Save this sentence to your Quote Vault?')) {
+                        this.saveQuote(book.paragraphs[idx], bookTitle);
+                    }
                 }
             }
 
             jumpToParagraph(idx) {
                 this.currentParagraphIndex = idx;
                 this.renderReaderContent();
-                if (this.isSpeaking) {
-                    this.restartTTS();
-                }
+                if (this.isSpeaking) this.restartTTS();
             }
 
             nextParagraph() {
                 const book = this.books.find(b => b.id === this.currentBookId);
-                if (!book) return;
-                if (this.currentParagraphIndex < book.paragraphs.length - 1) {
+                if (book && this.currentParagraphIndex < book.paragraphs.length - 1) {
                     this.currentParagraphIndex++;
+                    this.wordsRead += 15; // increment stats
                     this.renderReaderContent();
-                    if (this.isSpeaking) {
-                        this.restartTTS();
-                    }
+                    if (this.isSpeaking) this.restartTTS();
                 }
             }
 
@@ -497,9 +551,7 @@
                 if (this.currentParagraphIndex > 0) {
                     this.currentParagraphIndex--;
                     this.renderReaderContent();
-                    if (this.isSpeaking) {
-                        this.restartTTS();
-                    }
+                    if (this.isSpeaking) this.restartTTS();
                 }
             }
 
@@ -510,62 +562,79 @@
 
             setFontFamily(fam) {
                 this.fontFamily = fam;
-                ['sans', 'serif', 'mono', 'jakarta'].forEach(f => {
-                    const btn = document.getElementById(`font-btn-${f}`);
-                    if (btn) btn.classList.remove('border-indigo-500', 'bg-zinc-800');
-                });
-                const activeBtn = document.getElementById(`font-btn-${fam}`);
-                if (activeBtn) activeBtn.classList.add('border-indigo-500', 'bg-zinc-800');
                 this.renderReaderContent();
             }
 
-            setContentWidth(w) {
-                this.contentWidth = w;
-                this.renderReaderContent();
-            }
-
-            // TTS Playback Core
-            toggleTTSPlayback() {
-                if (this.isSpeaking) {
-                    this.pauseTTS();
-                } else {
-                    this.startTTS();
+            // Audio Soundscape Synthesizer using Web Audio API
+            playAmbient(type) {
+                this.currentAmbient = type;
+                if (this.audioCtx && this.audioCtx.state === 'running') {
+                    this.audioCtx.close();
+                    this.audioCtx = null;
                 }
+
+                if (type === 'off') return;
+
+                try {
+                    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const bufferSize = 2 * this.audioCtx.sampleRate;
+                    const noiseBuffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
+                    const output = noiseBuffer.getChannelData(0);
+
+                    for (let i = 0; i < bufferSize; i++) {
+                        let white = Math.random() * 2 - 1;
+                        if (type === 'rain') {
+                            output[i] = (white + (Math.random() * 2 - 1)) * 0.1;
+                        } else if (type === 'fire') {
+                            output[i] = (Math.random() < 0.005 ? Math.random() * 2 : 0) * 0.2;
+                        } else {
+                            output[i] = white * 0.05; // deep space
+                        }
+                    }
+
+                    const whiteNoise = this.audioCtx.createBufferSource();
+                    whiteNoise.buffer = noiseBuffer;
+                    whiteNoise.loop = true;
+
+                    const filter = this.audioCtx.createBiquadFilter();
+                    filter.type = type === 'rain' ? 'lowpass' : 'bandpass';
+                    filter.frequency.value = type === 'rain' ? 800 : 300;
+
+                    whiteNoise.connect(filter);
+                    filter.connect(this.audioCtx.destination);
+                    whiteNoise.start();
+                } catch(e) { console.log('Audio Context restricted', e); }
+            }
+
+            // TTS Core
+            toggleTTSPlayback() {
+                if (this.isSpeaking) { this.pauseTTS(); } else { this.startTTS(); }
             }
 
             startTTS() {
                 const book = this.books.find(b => b.id === this.currentBookId);
                 if (!book || !book.paragraphs[this.currentParagraphIndex]) return;
 
-                const textToSpeak = book.paragraphs[this.currentParagraphIndex];
-                this.utterance = new SpeechSynthesisUtterance(textToSpeak);
+                this.utterance = new SpeechSynthesisUtterance(book.paragraphs[this.currentParagraphIndex]);
                 this.utterance.rate = this.speechRate;
-                if (this.selectedVoice) {
-                    this.utterance.voice = this.selectedVoice;
-                }
+                if (this.voices[this.selectedVoice]) this.utterance.voice = this.voices[this.selectedVoice];
 
                 this.utterance.onstart = () => {
                     this.isSpeaking = true;
-                    this.isPaused = false;
                     document.getElementById('tts-status-badge').innerText = 'Speaking';
-                    document.getElementById('tts-status-badge').className = 'px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-indigo-500/20 text-indigo-400 border border-indigo-500/30';
-                    document.getElementById('tts-play-icon').innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-                    document.getElementById('tts-play-text').innerText = 'Pause Reading';
+                    document.getElementById('tts-status-badge').className = 'px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-[var(--accent-glow)] text-[var(--accent-color)] border border-[var(--accent-border)]';
+                    document.getElementById('tts-play-text').innerText = 'Pause';
                 };
 
                 this.utterance.onend = () => {
-                    // Automatically proceed to next paragraph when finished
                     if (this.currentParagraphIndex < book.paragraphs.length - 1) {
                         this.currentParagraphIndex++;
+                        this.wordsRead += 20;
                         this.renderReaderContent();
                         this.startTTS();
                     } else {
                         this.stopTTS();
                     }
-                };
-
-                this.utterance.onerror = () => {
-                    this.stopTTS();
                 };
 
                 this.synth.speak(this.utterance);
@@ -575,44 +644,30 @@
             pauseTTS() {
                 this.synth.cancel();
                 this.isSpeaking = false;
-                this.isPaused = true;
                 document.getElementById('tts-status-badge').innerText = 'Paused';
-                document.getElementById('tts-status-badge').className = 'px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30';
-                document.getElementById('tts-play-icon').innerHTML = '<path d="M8 5v14l11-7z"/>';
-                document.getElementById('tts-play-text').innerText = 'Resume Reading';
+                document.getElementById('tts-play-text').innerText = 'Resume';
             }
 
             stopTTS() {
                 this.synth.cancel();
                 this.isSpeaking = false;
-                this.isPaused = false;
                 document.getElementById('tts-status-badge').innerText = 'Idle';
                 document.getElementById('tts-status-badge').className = 'px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-zinc-800 text-zinc-400';
-                document.getElementById('tts-play-icon').innerHTML = '<path d="M8 5v14l11-7z"/>';
                 document.getElementById('tts-play-text').innerText = 'Read Aloud';
             }
 
-            // File Uploader Handler
+            restartTTS() { this.stopTTS(); this.startTTS(); }
+            changeVoice(idx) { this.selectedVoice = idx; if (this.isSpeaking) this.restartTTS(); }
+            updateSpeed(val) { this.speechRate = parseFloat(val); document.getElementById('tts-speed-label').innerText = val + 'x'; if (this.isSpeaking) this.restartTTS(); }
+
             handleFileUpload(event) {
                 const file = event.target.files[0];
                 if (!file) return;
-
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const text = e.target.result;
-                    // Split content into clean paragraphs by line breaks or periods
-                    const rawParagraphs = text.split(/\r?\n+/).filter(p => p.trim().length > 0);
-                    const paragraphs = rawParagraphs.length > 0 ? rawParagraphs : [text];
-
-                    const newBook = {
-                        id: 'book-' + Date.now(),
-                        title: file.name.replace(/\.[^/.]+$/, ""),
-                        coverColor: 'from-violet-600 to-indigo-600',
-                        progress: 0,
-                        currentIndex: 0,
-                        paragraphs: paragraphs
-                    };
-
+                    const paragraphs = text.split(/\r?\n+/).filter(p => p.trim().length > 0);
+                    const newBook = { id: 'book-' + Date.now(), title: file.name.replace(/\.[^/.]+$/, ""), coverColor: 'from-violet-600 to-indigo-600', progress: 0, currentIndex: 0, paragraphs: paragraphs.length ? paragraphs : [text] };
                     this.books.unshift(newBook);
                     this.saveToStorage();
                     this.renderLibrary();
@@ -621,35 +676,14 @@
                 reader.readAsText(file);
             }
 
-            // Manual Input Modals
-            openManualAddModal() {
-                document.getElementById('modal-manual').classList.remove('hidden');
-            }
-
-            closeManualAddModal() {
-                document.getElementById('modal-manual').classList.add('hidden');
-                document.getElementById('manual-title-input').value = '';
-                document.getElementById('manual-text-input').value = '';
-            }
-
+            openManualAddModal() { document.getElementById('modal-manual').classList.remove('hidden'); }
+            closeManualAddModal() { document.getElementById('modal-manual').classList.add('hidden'); }
             saveManualBook() {
                 const title = document.getElementById('manual-title-input').value.trim() || 'Untitled Light Novel';
                 const text = document.getElementById('manual-text-input').value.trim();
-                if (!text) {
-                    alert('Please enter some text content for your book.');
-                    return;
-                }
-
+                if (!text) return alert('Please enter text.');
                 const paragraphs = text.split(/\r?\n+/).filter(p => p.trim().length > 0);
-                const newBook = {
-                    id: 'book-' + Date.now(),
-                    title: title,
-                    coverColor: 'from-emerald-600 to-teal-600',
-                    progress: 0,
-                    currentIndex: 0,
-                    paragraphs: paragraphs
-                };
-
+                const newBook = { id: 'book-' + Date.now(), title, coverColor: 'from-emerald-600 to-teal-600', progress: 0, currentIndex: 0, paragraphs };
                 this.books.unshift(newBook);
                 this.saveToStorage();
                 this.closeManualAddModal();
@@ -657,13 +691,9 @@
                 this.openBook(newBook.id);
             }
 
-            toggleSettingsModal() {
-                const modal = document.getElementById('modal-settings');
-                modal.classList.toggle('hidden');
-            }
+            toggleSettingsModal() { document.getElementById('modal-settings').classList.toggle('hidden'); }
         }
 
-        // Initialize Application Instance globally
         const app = new EReaderApp();
     </script>
 </body>
