@@ -40,6 +40,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 .kbd{font:600 11px "JetBrains Mono";border:1px solid #303749;background:#151a25;padding:2px 6px;border-radius:6px;color:#aeb7cd}
 .badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 8px;background:var(--accent-glow);color:#dfe0ff;border:1px solid var(--accent-border);font-size:11px;font-weight:700}
 @media(max-width:900px){.reader-shell{height:auto;min-height:calc(100vh - 70px)}.reader-sidebar{position:relative!important;width:100%!important}.reader-layout{flex-direction:column}.reader-content{min-height:65vh}.hero-title{font-size:2.4rem!important}}
+.reader-text.compact{line-height:var(--line-height)!important;max-width:var(--content-width)!important}.reader-text.justify p{text-align:justify}.reader-text.center p{text-align:center}.reader-stage.warm{background:#17130e;color:#f7e9cc}.reader-stage.paper{background:#eee9dc;color:#29261f}.reader-stage.midnight{background:#0d1020}.reader-stage.oled{background:#05070d}.reader-stage.focus{box-shadow:inset 0 0 120px rgba(0,0,0,.45)}
 </style>
 </head>
 <body>
@@ -127,7 +128,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
           <div class="font-bold text-sm mb-3">🔊 Voice reader</div>
           <select id="voice-select" class="input"></select>
           <div class="flex gap-2 mt-3">
-            <button class="btn flex-1" onclick="app.speakCurrent()">▶️ Read</button><button class="btn flex-1" onclick="app.pauseSpeech()">⏸️ Pause</button><button class="btn flex-1" onclick="app.stopSpeech()">⏹️ Stop</button>
+            <button class="btn flex-1" onclick="app.speakCurrent()">▶️ Read Page / Chapter</button><button class="btn flex-1" onclick="app.pauseSpeech()">⏸️ Pause</button><button class="btn flex-1" onclick="app.stopSpeech()">⏹️ Stop</button>
           </div>
           <div class="text-xs text-slate-500 mt-3">Speed <span id="speed-label">1.0×</span></div>
           <input id="speed-range" class="range" type="range" min=".5" max="2" step=".1" value="1" oninput="app.setSpeechRate(+this.value)">
@@ -187,7 +188,7 @@ class EReaderApp{
   this.quotes=this.load(LS_QUOTES,[]);
   this.users=this.load(LS_USERS,[]);
   this.currentUser=this.load(LS_CURRENT,null);
-  this.prefs=this.load(LS_PREFS,{fontSize:20,fontFamily:"Merriweather",brightness:0,speechRate:1,accent:this.load(LS_ACCENT,"#818cf8")});
+  this.prefs=this.load(LS_PREFS,{fontSize:20,fontFamily:"Merriweather",brightness:0,speechRate:1,accent:this.load(LS_ACCENT,"#818cf8"),lineHeight:1.9,contentWidth:850,margin:32,theme:"oled",align:"left",focusMode:false});
   this.currentBookId=null;this.currentBook=null;this.currentParagraphIndex=0;
   this.epubBook=null;this.epubRendition=null;this.pdfDoc=null;this.pdfPageNum=1;this.pdfTotalPages=0;this.pdfPageWordCounts={};
   this.speechIndex=0;this.speechRate=this.prefs.speechRate||1;this.ambientCtx=null;this.ambientSource=null;
@@ -198,7 +199,7 @@ class EReaderApp{
  init(){
   this.applyPrefs();this.refreshVoices();speechSynthesis.onvoiceschanged=()=>this.refreshVoices();
   if(!this.currentUser){this.currentUser={id:"guest_"+Date.now(),username:"Guest",xp:0,wordsRead:0,guest:true};}
-  this.updateUserUI();this.renderLibrary();this.bindKeys();
+  this.updateUserUI();this.renderLibrary();this.bindKeys();this.applyReaderOptions();
  }
  toast(msg){const r=document.getElementById("toast-root");r.innerHTML='<div class="toast">'+msg+'</div>';setTimeout(()=>r.innerHTML="",3000)}
  showLibrary(){this.stopSpeech();document.getElementById("reader-view").classList.add("hidden");document.getElementById("library-view").classList.remove("hidden");this.renderLibrary()}
@@ -266,8 +267,10 @@ class EReaderApp{
    this.epubBook=ePub(buf);
    const box=document.getElementById("epub-viewer-canvas");box.innerHTML="";
    this.epubRendition=this.epubBook.renderTo(box,{width:"100%",height:"100%",flow:"paginated",spread:"none"});
-   this.epubRendition.on("relocated",loc=>{
-    if(loc?.start?.cfi){this.currentBook.epubCfi=loc.start.cfi;this.currentBook.progress=Math.round((loc.start?.percentage||0)*100);this.persistBook();this.updateReaderProgress()}
+   this.epubRendition.on("relocated",async loc=>{
+    if(loc?.start?.cfi){this.currentBook.epubCfi=loc.start.cfi;this.currentBook.progress=Math.round((loc.start?.percentage||0)*100);this.persistBook();this.updateReaderProgress();
+      try{const key=loc.start.href||loc.start.cfi;this.currentBook.readEPUBSections=this.currentBook.readEPUBSections||[];if(!this.currentBook.readEPUBSections.includes(key)){const txt=await this.getCurrentEPUBText();const words=this.countWords(txt);this.currentBook.readEPUBSections.push(key);this.addWordsRead(words,this.currentBook.id)}}catch(e){console.warn("EPUB word count",e)}
+    }
     this.readerMeta("EPUB • "+Math.round((loc?.start?.percentage||0)*100)+"%")
    });
    await this.epubRendition.display(this.currentBook.epubCfi||undefined);
@@ -329,9 +332,26 @@ class EReaderApp{
  logoutGuest(){this.currentUser={id:"guest_"+Date.now(),username:"Guest",xp:0,wordsRead:0,guest:true};this.save(LS_CURRENT,this.currentUser);this.closeModal();this.updateStats()}
  openLeaderboard(){const all=[...this.users,...(this.currentUser&&!this.currentUser.guest?[this.currentUser]:[])].filter((u,i,a)=>a.findIndex(x=>x.id===u.id)===i);const mock=[{username:"ReaderNova",wordsRead:127000},{username:"BookKnight",wordsRead:94000},{username:"PageMage",wordsRead:71000},{username:"NightOwl",wordsRead:42000}].map((u,i)=>({...u,id:"mock"+i,xp:Math.floor(u.wordsRead/100)}));all.push(...mock);all.sort((a,b)=>(b.xp||Math.floor((b.wordsRead||0)/100))-(a.xp||Math.floor((a.wordsRead||0)/100)));this.modal('<div class="modal-bg"><div class="modal glass"><div class="flex justify-between items-center"><h2 class="text-2xl font-black">🏆 Top Readers</h2><button class="btn" onclick="app.closeModal()">✕</button></div><div class="text-xs text-slate-500 mt-2">Local leaderboard + sample entries until a backend is connected.</div><div class="grid gap-2 mt-5">'+all.slice(0,10).map((u,i)=>'<div class="glass2 rounded-2xl p-3 flex items-center gap-3"><div class="w-9 h-9 rounded-full flex items-center justify-center font-black" style="background:'+(i<3?'var(--accent)':'#161d2d')+'">'+(i+1)+'</div><div class="flex-1"><div class="font-bold">'+this.escape(u.username)+'</div><div class="text-xs text-slate-500">'+(u.wordsRead||0).toLocaleString()+' words</div></div><div class="font-black">'+(u.xp||0)+' XP</div></div>').join("")+'</div></div></div>')}
  openSettings(){this.modal('<div class="modal-bg"><div class="modal glass"><div class="flex justify-between items-center"><h2 class="text-2xl font-black">⚙️ App Settings</h2><button class="btn" onclick="app.closeModal()">✕</button></div><div class="mt-6"><label class="text-sm font-bold">Accent color</label><input id="accent-picker" class="w-full h-12 mt-2" type="color" value="'+this.prefs.accent+'"><div class="flex gap-2 mt-3">'+["#818cf8","#22d3ee","#34d399","#fb7185","#f59e0b"].map(c=>'<button class="w-10 h-10 rounded-full border border-white/10" style="background:'+c+'" onclick="app.setAccent(\''+c+'\')"></button>').join("")+'</div></div><div class="mt-6"><label class="text-sm font-bold">Brightness dimmer</label><input class="range mt-2" type="range" min="0" max="85" value="'+this.prefs.brightness+'" oninput="app.setBrightness(+this.value)"></div><div class="mt-6 flex justify-end"><button class="btn btn-accent" onclick="app.closeModal()">Done ✨</button></div></div></div>')}
- openReaderSettings(){this.openSettings()}
+ openReaderSettings(){
+  const p=this.prefs;
+  this.modal(`<div class="modal-bg"><div class="modal glass"><div class="flex justify-between items-center"><div><h2 class="text-2xl font-black">⚙️ Reader Settings</h2><p class="text-xs text-slate-500 mt-1">Fine-tune your reading environment.</p></div><button class="btn" onclick="app.closeModal()">✕</button></div>
+  <div class="grid md:grid-cols-2 gap-4 mt-6">
+   <div class="glass2 rounded-2xl p-4"><div class="font-bold">📏 Layout</div>
+    <label class="text-xs text-slate-500 block mt-4">Line spacing</label><input class="range" type="range" min="1.3" max="2.5" step=".1" value="${p.lineHeight}" oninput="app.setReaderOption('lineHeight',+this.value)">
+    <label class="text-xs text-slate-500 block mt-4">Content width</label><input class="range" type="range" min="560" max="1100" step="10" value="${p.contentWidth}" oninput="app.setReaderOption('contentWidth',+this.value)">
+    <label class="text-xs text-slate-500 block mt-4">Side margin</label><input class="range" type="range" min="0" max="80" step="4" value="${p.margin}" oninput="app.setReaderOption('margin',+this.value)">
+   </div>
+   <div class="glass2 rounded-2xl p-4"><div class="font-bold">🌙 Reading theme</div><div class="grid grid-cols-2 gap-2 mt-3">${['oled','midnight','warm','paper'].map(t=>`<button class="btn ${p.theme===t?'btn-accent':''}" onclick="app.setReaderOption('theme','${t}')">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div>
+    <div class="font-bold mt-5">📐 Text alignment</div><div class="grid grid-cols-3 gap-2 mt-3">${['left','justify','center'].map(t=>`<button class="btn ${p.align===t?'btn-accent':''}" onclick="app.setReaderOption('align','${t}')">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div>
+    <div class="font-bold mt-5">🧘 Focus mode</div><button class="btn w-full mt-2 ${p.focusMode?'btn-accent':''}" onclick="app.setReaderOption('focusMode',!app.prefs.focusMode)">${p.focusMode?'✅ Focus mode ON':'⭕ Focus mode OFF'}</button>
+   </div>
+  </div><div class="flex justify-end gap-2 mt-5"><button class="btn" onclick="app.resetReaderSettings()">↩️ Reset</button><button class="btn btn-accent" onclick="app.closeModal()">Done ✨</button></div></div></div>`)
+ }
+ setReaderOption(key,value){this.prefs[key]=value;this.save(LS_PREFS,this.prefs);this.applyReaderOptions();this.openReaderSettings()}
+ applyReaderOptions(){const stage=document.getElementById('reader-stage');if(!stage)return;stage.classList.remove('oled','midnight','warm','paper','focus');stage.classList.add(this.prefs.theme||'oled');if(this.prefs.focusMode)stage.classList.add('focus');document.documentElement.style.setProperty('--line-height',this.prefs.lineHeight||1.9);document.documentElement.style.setProperty('--content-width',(this.prefs.contentWidth||850)+'px');const t=document.getElementById('txt-reader');if(t){t.classList.add('compact');t.classList.remove('justify','center');if(this.prefs.align!=='left')t.classList.add(this.prefs.align);t.style.paddingLeft=(this.prefs.margin||32)+'px';t.style.paddingRight=(this.prefs.margin||32)+'px'}}
+ resetReaderSettings(){this.prefs={...this.prefs,fontSize:20,fontFamily:'Merriweather',lineHeight:1.9,contentWidth:850,margin:32,theme:'oled',align:'left',focusMode:false};this.save(LS_PREFS,this.prefs);this.applyPrefs();this.applyReaderOptions();this.openReaderSettings()}
  setAccent(c){this.prefs.accent=c;this.save(LS_ACCENT,c);this.save(LS_PREFS,this.prefs);this.applyPrefs();this.toast("🎨 Accent updated")}
- applyPrefs(){document.documentElement.style.setProperty("--accent",this.prefs.accent||"#818cf8");document.documentElement.style.setProperty("--accent-glow",this.hexToRgba(this.prefs.accent||"#818cf8",.28));document.documentElement.style.setProperty("--accent-border",this.hexToRgba(this.prefs.accent||"#818cf8",.42));this.setFontSize(this.prefs.fontSize||20);this.setFont(this.prefs.fontFamily||"Merriweather");this.setBrightness(this.prefs.brightness||0)}
+ applyPrefs(){document.documentElement.style.setProperty("--accent",this.prefs.accent||"#818cf8");document.documentElement.style.setProperty("--accent-glow",this.hexToRgba(this.prefs.accent||"#818cf8",.28));document.documentElement.style.setProperty("--accent-border",this.hexToRgba(this.prefs.accent||"#818cf8",.42));this.setFontSize(this.prefs.fontSize||20);this.setFont(this.prefs.fontFamily||"Merriweather");this.setBrightness(this.prefs.brightness||0);this.applyReaderOptions()}
  hexToRgba(hex,a){let h=hex.replace("#","");if(h.length===3)h=h.split("").map(x=>x+x).join("");const n=parseInt(h,16);return`rgba(${n>>16},${n>>8&255},${n&255},${a})`}
  setBrightness(v){this.prefs.brightness=v;document.getElementById("brightness-overlay").style.opacity=v/100;this.save(LS_PREFS,this.prefs)}
  changeFontSize(d){this.setFontSize(Math.min(32,Math.max(14,(this.prefs.fontSize||20)+d)))}
@@ -339,11 +359,21 @@ class EReaderApp{
  setFont(v){this.prefs.fontFamily=v;document.documentElement.style.setProperty("--reader-font",'\"'+v+'\",serif');document.querySelectorAll(".reader-text").forEach(x=>x.style.fontFamily='"'+v+'",serif');const s=document.getElementById("font-family");if(s)s.value=v;this.save(LS_PREFS,this.prefs)}
  refreshVoices(){const s=document.getElementById("voice-select");if(!s)return;const voices=speechSynthesis.getVoices();s.innerHTML=voices.map((v,i)=>'<option value="'+i+'">'+this.escape(v.name)+' — '+this.escape(v.lang)+'</option>').join("")}
  setSpeechRate(v){this.speechRate=v;this.prefs.speechRate=v;document.getElementById("speed-label").textContent=v.toFixed(1)+"×";this.save(LS_PREFS,this.prefs)}
- speakCurrent(){
-  if(!this.currentBook||this.currentBook.format!=="txt"){this.toast("🔊 Voice reading is currently optimized for TXT.");return}
-  const text=this.currentBook.paragraphs[this.currentParagraphIndex];if(!text)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=this.speechRate;const voices=speechSynthesis.getVoices(),idx=+document.getElementById("voice-select").value;if(voices[idx])u.voice=voices[idx];u.onstart=()=>document.getElementById("speech-status").textContent="🔊 Reading…";u.onend=()=>{document.getElementById("speech-status").textContent="Finished";if(this.currentParagraphIndex<this.currentBook.paragraphs.length-1)this.nextPage()};u.onerror=()=>document.getElementById("speech-status").textContent="Voice error";speechSynthesis.speak(u)}
+ async speakCurrent(){
+  if(!this.currentBook){this.toast("📖 Open a book first.");return}
+  this.stopSpeech();let text="",advance=null;
+  try{
+   if(this.currentBook.format==='txt'){text=this.currentBook.paragraphs?.[this.currentParagraphIndex]||'';advance=()=>this.currentParagraphIndex<this.currentBook.paragraphs.length-1&&this.nextPage()}
+   else if(this.currentBook.format==='pdf'){if(!this.pdfDoc)await this.loadPDF();const page=await this.pdfDoc.getPage(this.pdfPageNum);const tc=await page.getTextContent();text=tc.items.map(x=>x.str).join(' ').replace(/\s+/g,' ').trim();advance=()=>this.pdfPageNum<this.pdfTotalPages&&this.nextPage()}
+   else if(this.currentBook.format==='epub'){text=await this.getCurrentEPUBText();advance=()=>this.epubRendition&&this.epubRendition.next()}
+   if(!text){this.toast('⚠️ No readable text was found here.');return}
+   const max=10000;this.speechQueue=[];for(let i=0;i<text.length;i+=max)this.speechQueue.push(text.slice(i,i+max));this.speechQueueIndex=0;this.speechAdvance=advance;this.speakNextChunk();
+  }catch(e){console.error(e);this.toast('❌ TTS extraction failed: '+e.message)}
+ }
+ async getCurrentEPUBText(){let text='';try{for(const c of (this.epubRendition?.getContents?.()||[])){const root=c.document?.body||c.document?.documentElement;if(root)text+=(root.innerText||root.textContent||'')+' ';}}catch{}return text.replace(/\s+/g,' ').trim()}
+ speakNextChunk(){if(!this.speechQueue||this.speechQueueIndex>=this.speechQueue.length){document.getElementById('speech-status').textContent='Finished';const a=this.speechAdvance;this.speechQueue=null;if(a)setTimeout(a,150);return}const u=new SpeechSynthesisUtterance(this.speechQueue[this.speechQueueIndex++]);u.rate=this.speechRate;const v=speechSynthesis.getVoices(),i=+document.getElementById('voice-select').value;if(v[i])u.voice=v[i];u.onstart=()=>document.getElementById('speech-status').textContent='🔊 Reading…';u.onend=()=>this.speakNextChunk();u.onerror=()=>{this.speechQueue=null;document.getElementById('speech-status').textContent='Voice error'};speechSynthesis.speak(u)}
  pauseSpeech(){if(speechSynthesis.speaking){speechSynthesis.paused?speechSynthesis.resume():speechSynthesis.pause();document.getElementById("speech-status").textContent=speechSynthesis.paused?"⏸️ Paused":"🔊 Reading…"}}
- stopSpeech(){speechSynthesis.cancel();const s=document.getElementById("speech-status");if(s)s.textContent="Idle"}
+ stopSpeech(){speechSynthesis.cancel();this.speechQueue=null;this.speechAdvance=null;const s=document.getElementById("speech-status");if(s)s.textContent="Idle"}
  playAmbient(mode){this.stopAmbient();if(mode==="off"){this.toast("🔇 Ambient off");return}this.toast(mode==="rain"?"🌧️ Rain mode selected":"🔥 Ambient mode selected");this.startAmbient(mode)}
  startAmbient(mode){
   try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;this.ambientCtx=new C();const o=this.ambientCtx.createOscillator(),g=this.ambientCtx.createGain();o.frequency.value=mode==="space"?110:mode==="fire"?55:35;g.gain.value=.018;o.connect(g);g.connect(this.ambientCtx.destination);o.start();this.ambientSource=o}catch{}}
