@@ -1,1117 +1,366 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuraRead // Ultimate OLED E-Reader & Gamified Suite</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        darker: '#030305',
-                        card: '#0c0c10',
-                        cardhover: '#14141c',
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- EPUB.js and PDF.js Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/epub.js/0.3.93/epub.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    </script>
-    <style>
-        :root {
-            --accent: #6366f1;
-            --accent-glow: rgba(99, 102, 241, 0.4);
-            --accent-border: rgba(99, 102, 241, 0.7);
-        }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .font-sans { font-family: 'Inter', sans-serif; }
-        .font-serif { font-family: 'Merriweather', serif; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-        .font-fira { font-family: 'Fira Code', monospace; }
-        .font-playfair { font-family: 'Playfair Display', serif; }
-        .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
-        
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #030305; }
-        ::-webkit-scrollbar-thumb { background: #1f1f28; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-        .glow-hover {
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .glow-hover:hover {
-            border-color: var(--accent);
-            box-shadow: 0 0 25px var(--accent-glow), inset 0 0 12px var(--accent-glow);
-            transform: translateY(-2px);
-        }
-
-        .tts-highlight {
-            background-color: var(--accent-glow);
-            border-left: 4px solid var(--accent);
-            padding-left: 12px;
-            transition: all 0.2s ease;
-        }
-
-        #brightness-overlay {
-            pointer-events: none;
-            transition: background-color 0.2s ease;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>AURA READ — Immersive E-Reader</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/epub.js/0.3.93/epub.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Merriweather:wght@400;700&family=Playfair+Display:wght@500;700&family=Fira+Code:wght@400;600&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--accent:#818cf8;--accent-glow:rgba(129,140,248,.28);--accent-border:rgba(129,140,248,.42);--reader-size:20px;--brightness:0}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#05070d;color:#f5f7ff;font-family:Inter,system-ui,sans-serif}
+body{overflow-x:hidden}.hidden{display:none!important}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+::selection{background:var(--accent);color:white}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:#080b13}::-webkit-scrollbar-thumb{background:#242a3a;border-radius:99px}
+.glow{box-shadow:0 0 60px var(--accent-glow)}.glass{background:rgba(12,16,27,.72);border:1px solid rgba(255,255,255,.07);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+.glass2{background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));border:1px solid rgba(255,255,255,.08)}
+.btn{border:1px solid rgba(255,255,255,.09);background:#101522;color:#e9edff;border-radius:14px;padding:.65rem .9rem;transition:.18s}
+.btn:hover{transform:translateY(-1px);border-color:var(--accent-border);background:#151b2a}.btn-accent{background:var(--accent);border-color:var(--accent);color:white;font-weight:800}.btn-danger{color:#ff9a9a}
+.pill{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);border-radius:999px;padding:.35rem .65rem;font-size:.72rem;color:#aeb7cd}
+.hero-grid{background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px}
+.orb{position:absolute;border-radius:999px;filter:blur(55px);pointer-events:none}
+.card{border:1px solid rgba(255,255,255,.07);background:rgba(10,14,24,.75);border-radius:22px}
+.input{width:100%;background:#080c15;border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:.75rem;color:#fff;outline:none}
+.input:focus{border-color:var(--accent-border);box-shadow:0 0 0 3px var(--accent-glow)}
+.stat{min-height:125px}.book-card{transition:.2s;cursor:pointer}.book-card:hover{transform:translateY(-3px);border-color:var(--accent-border);box-shadow:0 15px 45px rgba(0,0,0,.25)}
+.cover{aspect-ratio:3/4;background:linear-gradient(145deg,#171d2d,#090c14);border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.progress{height:7px;background:#151a27;border-radius:99px;overflow:hidden}.progress>div{height:100%;background:linear-gradient(90deg,var(--accent),#b9b5ff);border-radius:99px;transition:.25s}
+.reader-shell{height:calc(100vh - 82px);min-height:560px}.reader-content{height:100%;overflow:auto}
+.reader-text{font-family:Merriweather,serif;font-size:var(--reader-size);line-height:1.9;color:#e9e9ee;max-width:850px;margin:auto}
+.reader-text p{padding:1rem;border-radius:12px;transition:.2s}.reader-text p:hover{background:rgba(255,255,255,.025)}.reader-text p.active{background:var(--accent-glow);outline:1px solid var(--accent-border)}
+#epub-viewer-canvas iframe{background:#fff;border-radius:12px}#pdf-canvas{display:block;max-width:100%;height:auto;margin:auto;border-radius:10px;background:#fff}
+.range{accent-color:var(--accent);width:100%}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:100;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(10px)}
+.modal{width:min(760px,100%);max-height:90vh;overflow:auto;border-radius:24px;padding:22px}
+.toast{position:fixed;right:18px;bottom:18px;z-index:200;max-width:340px;background:#111827;border:1px solid var(--accent-border);box-shadow:0 15px 50px #0008;border-radius:16px;padding:12px 15px}
+.kbd{font:600 11px "JetBrains Mono";border:1px solid #303749;background:#151a25;padding:2px 6px;border-radius:6px;color:#aeb7cd}
+.badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 8px;background:var(--accent-glow);color:#dfe0ff;border:1px solid var(--accent-border);font-size:11px;font-weight:700}
+@media(max-width:900px){.reader-shell{height:auto;min-height:calc(100vh - 70px)}.reader-sidebar{position:relative!important;width:100%!important}.reader-layout{flex-direction:column}.reader-content{min-height:65vh}.hero-title{font-size:2.4rem!important}}
+</style>
 </head>
-<body class="bg-darker text-zinc-100 min-h-screen flex flex-col selection:bg-[var(--accent)] selection:text-white">
+<body>
+<div id="brightness-overlay" style="position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:180"></div>
 
-    <!-- Screen Brightness Dimmer Overlay -->
-    <div id="brightness-overlay" class="fixed inset-0 z-40 bg-black" style="opacity: 0;"></div>
-
-    <!-- Top Navigation Header -->
-    <header class="sticky top-5 z-50 max-w-7xl w-[92%] mx-auto backdrop-blur-2xl bg-darker/70 border border-zinc-800/80 rounded-2xl px-6 py-3.5 flex items-center justify-between shadow-2xl glow-hover">
-        <div class="flex items-center space-x-3 cursor-pointer group" onclick="app.showLibrary()">
-            <div id="app-logo-badge" class="w-10 h-10 rounded-xl bg-[var(--accent)] flex items-center justify-center shadow-lg transition-colors">
-                <!-- Cool Spark / Book Icon -->
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            </div>
-            <div>
-                <h1 class="font-extrabold text-base tracking-wider bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">AURA READ</h1>
-                <p class="text-[10px] text-zinc-500 font-medium uppercase tracking-widest">OLED E-Reader Studio</p>
-            </div>
-        </div>
-
-        <div class="flex items-center space-x-3">
-            <button onclick="app.toggleLeaderboardModal()" class="hidden sm:flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-card border border-zinc-800 text-xs font-semibold text-zinc-300 glow-hover transition">
-                <span>🏆</span>
-                <span>Leaderboard</span>
-            </button>
-
-            <div class="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-card border border-zinc-800 text-xs font-semibold text-zinc-300 glow-hover">
-                <span>⚡</span>
-                <span id="header-xp-count">0 XP</span>
-            </div>
-            
-            <div id="reader-nav-controls" class="hidden items-center space-x-3">
-                <button onclick="app.showLibrary()" class="px-3.5 py-2 rounded-xl bg-card border border-zinc-800 text-zinc-300 hover:text-white glow-hover transition text-xs font-medium flex items-center space-x-1.5">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    <span>Library</span>
-                </button>
-            </div>
-
-            <!-- Profile & Account Button -->
-            <div id="auth-header-section" class="flex items-center space-x-2">
-                <button onclick="app.openAuthModal()" id="auth-login-btn" class="px-4 py-2 rounded-xl bg-[var(--accent)] text-white text-xs font-bold shadow-lg glow-hover transition">Sign In</button>
-                <div id="auth-user-badge" class="hidden items-center space-x-2 px-3 py-1.5 rounded-xl bg-card border border-zinc-800 cursor-pointer glow-hover" onclick="app.openAuthModal()">
-                    <img id="nav-user-pfp" src="" class="w-6 h-6 rounded-full object-cover border border-[var(--accent)]" alt="pfp">
-                    <span id="nav-username-label" class="text-xs font-bold text-white"></span>
-                </div>
-            </div>
-
-            <button onclick="app.toggleSettingsModal()" class="p-2.5 rounded-xl bg-card border border-zinc-800 text-zinc-300 hover:text-white glow-hover transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            </button>
-        </div>
-    </header>
-
-    <!-- Main Viewport -->
-    <main class="flex-1 max-w-7xl w-[92%] mx-auto p-6 md:p-8 z-10 relative">
-
-        <!-- VIEW 1: LIBRARY DASHBOARD -->
-        <div id="view-library" class="space-y-8">
-            <!-- Stats Bar -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-                <div class="bg-card border border-zinc-800/80 rounded-3xl p-6 flex items-center space-x-4 glow-hover">
-                    <div class="w-12 h-12 rounded-2xl bg-[var(--accent)]/10 border border-[var(--accent-border)] flex items-center justify-center text-xl">📚</div>
-                    <div>
-                        <p class="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Total Books</p>
-                        <h4 id="stat-total-books" class="text-2xl font-extrabold text-white mt-0.5">0</h4>
-                    </div>
-                </div>
-                <div class="bg-card border border-zinc-800/80 rounded-3xl p-6 flex items-center space-x-4 glow-hover">
-                    <div class="w-12 h-12 rounded-2xl bg-[var(--accent)]/10 border border-[var(--accent-border)] flex items-center justify-center text-xl">⚡</div>
-                    <div>
-                        <p class="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Total XP Earned</p>
-                        <h4 id="stat-xp" class="text-2xl font-extrabold text-white mt-0.5">0 XP</h4>
-                    </div>
-                </div>
-                <div class="bg-card border border-zinc-800/80 rounded-3xl p-6 flex items-center space-x-4 glow-hover">
-                    <div class="w-12 h-12 rounded-2xl bg-[var(--accent)]/10 border border-[var(--accent-border)] flex items-center justify-center text-xl">📖</div>
-                    <div>
-                        <p class="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Words Read</p>
-                        <h4 id="stat-words-read" class="text-2xl font-extrabold text-white mt-0.5">0</h4>
-                    </div>
-                </div>
-                <div onclick="app.toggleLeaderboardModal()" class="bg-card border border-zinc-800/80 rounded-3xl p-6 flex items-center space-x-4 glow-hover cursor-pointer group">
-                    <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-xl">🏆</div>
-                    <div>
-                        <p class="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Leaderboard</p>
-                        <h4 class="text-lg font-extrabold text-white mt-0.5 group-hover:text-[var(--accent)] transition">View Top 100 →</h4>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Hero Banner -->
-            <div class="relative overflow-hidden rounded-3xl bg-card border border-zinc-800/80 p-8 md:p-12 shadow-2xl glow-hover">
-                <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-[var(--accent)]/15 rounded-full blur-3xl pointer-events-none transition-colors"></div>
-                <div class="relative z-10 max-w-2xl">
-                    <span class="px-3.5 py-1 rounded-full text-xs font-semibold bg-[var(--accent)]/15 text-[var(--accent)] border border-[var(--accent-border)]">OLED IMMERSIVE GAMIFIED SUITE</span>
-                    <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight mt-4 text-white">Upload TXT, EPUB, & PDF Books. Gain XP & Rank Up!</h2>
-                    <p class="text-zinc-400 mt-3 text-sm md:text-base leading-relaxed">Every 100 words read (or listened via TTS) earns 1 XP. Compete on the global leaderboard against readers worldwide!</p>
-                    
-                    <div class="mt-8 flex flex-wrap gap-4">
-                        <label class="cursor-pointer px-6 py-3.5 rounded-2xl bg-[var(--accent)] hover:opacity-90 text-white font-semibold shadow-lg glow-hover transition flex items-center space-x-2 text-sm">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                            <span>Upload Book (.txt, .epub, .pdf)</span>
-                            <input type="file" id="book-file-input" accept=".txt,.epub,.pdf" class="hidden" onchange="app.handleFileUpload(event)">
-                        </label>
-                        <button onclick="app.openManualAddModal()" class="px-6 py-3.5 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 font-semibold border border-zinc-800 glow-hover transition flex items-center space-x-2 text-sm">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            <span>Paste Story Text</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Library & Quote Vault Navigation -->
-            <div class="space-y-6">
-                <div class="flex items-center space-x-6 border-b border-zinc-800 pb-4">
-                    <button onclick="app.switchTab('library')" id="tab-btn-library" class="text-base font-bold text-white border-b-2 border-[var(--accent)] pb-1 transition">Saved Library</button>
-                    <button onclick="app.switchTab('quotes')" id="tab-btn-quotes" class="text-base font-medium text-zinc-400 hover:text-white pb-1 transition">Quote Vault</button>
-                </div>
-
-                <div id="tab-content-library">
-                    <div id="books-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
-                </div>
-
-                <div id="tab-content-quotes" class="hidden space-y-4">
-                    <div id="quotes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- VIEW 2: READER & AUDIO WORKSPACE -->
-        <div id="view-reader" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-            
-            <!-- Center Reader Area -->
-            <div class="lg:col-span-3 space-y-6">
-                <!-- Reader Navigation Bar -->
-                <div class="flex items-center justify-between bg-card border border-zinc-800/80 rounded-2xl p-4 glow-hover backdrop-blur-md">
-                    <div>
-                        <h2 id="reader-book-title" class="font-bold text-base text-white truncate max-w-xs md:max-w-md">Book Title</h2>
-                        <p id="reader-progress-indicator" class="text-xs text-zinc-400 mt-0.5">Progress: 0% read</p>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="app.adjustFontSize(-1)" class="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold text-sm glow-hover transition">A-</button>
-                        <button onclick="app.adjustFontSize(1)" class="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold text-sm glow-hover transition">A+</button>
-                        <button onclick="app.toggleSettingsModal()" class="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center justify-center glow-hover transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Dual Progress Bars Container (Page-wise + Natural Text-Size Wise) -->
-                <div class="bg-card border border-zinc-800/80 rounded-2xl p-5 space-y-4 glow-hover">
-                    <!-- Page Progress Bar -->
-                    <div class="space-y-1.5">
-                        <div class="flex justify-between text-xs text-zinc-400 font-semibold">
-                            <span class="uppercase tracking-wider">Page / Chapter Progress</span>
-                            <span id="progress-percent-label">0%</span>
-                        </div>
-                        <div class="w-full bg-zinc-900 h-2 rounded-full overflow-hidden border border-zinc-800">
-                            <div id="reader-progress-bar-fill" class="bg-[var(--accent)] h-full transition-all duration-300" style="width: 0%;"></div>
-                        </div>
-                    </div>
-
-                    <!-- Natural Text-Size & Word Volume Tracker -->
-                    <div class="space-y-1.5 pt-2 border-t border-zinc-800/80">
-                        <div class="flex justify-between text-xs text-zinc-400 font-semibold">
-                            <span class="uppercase tracking-wider">XP & Reading Volume Tracker</span>
-                            <span id="progress-words-label">0 words read</span>
-                        </div>
-                        <div class="w-full bg-zinc-900 h-2 rounded-full overflow-hidden border border-zinc-800">
-                            <div id="reader-density-bar-fill" class="bg-gradient-to-r from-emerald-500 to-[var(--accent)] h-full transition-all duration-300" style="width: 0%;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Content Box -->
-                <div id="reader-content-box" class="bg-card border border-zinc-800/80 rounded-3xl p-8 md:p-14 shadow-2xl min-h-[700px] leading-relaxed transition-all duration-300 relative glow-hover">
-                    <div class="absolute top-4 right-4 text-[11px] text-zinc-500 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800 pointer-events-none">
-                        💡 Click any paragraph to save to Quote Vault
-                    </div>
-                </div>
-
-                <!-- EPUB / PDF Navigation controls -->
-                <div id="reader-pagination-controls" class="hidden flex items-center justify-between bg-card border border-zinc-800 rounded-2xl p-4 glow-hover">
-                    <button onclick="app.prevReaderPage()" class="px-5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm font-semibold text-zinc-200 glow-hover transition">← Previous</button>
-                    <span id="reader-page-indicator" class="text-xs text-zinc-400 font-bold">Page 1</span>
-                    <button onclick="app.nextReaderPage()" class="px-5 py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-semibold glow-hover transition">Next →</button>
-                </div>
-            </div>
-
-            <!-- Right Column: Voice Studio & Ambient Soundscapes -->
-            <div class="lg:col-span-1 space-y-6 sticky top-28">
-                <!-- TTS Voice Studio Box -->
-                <div class="bg-card border border-zinc-800/80 rounded-3xl p-6 shadow-xl space-y-6 glow-hover">
-                    <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
-                        <h3 class="font-bold text-white text-base flex items-center space-x-2">
-                            <svg class="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
-                            <span>Voice Studio (+XP)</span>
-                        </h3>
-                        <span id="tts-status-badge" class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-zinc-900 text-zinc-400 border border-zinc-800">Idle</span>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Voice Preset</label>
-                            <select id="tts-voice-select" onchange="app.changeVoice(this.value)" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-zinc-200 focus:outline-none transition glow-hover">
-                                <option value="">Loading system voices...</option>
-                            </select>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-xs font-semibold text-zinc-400 mb-2">
-                                <span class="uppercase tracking-wider">Speed</span>
-                                <span id="tts-speed-label" class="text-[var(--accent)] font-bold">1.0x</span>
-                            </div>
-                            <input type="range" id="tts-speed-range" min="0.5" max="2.0" step="0.1" value="1.0" oninput="app.updateSpeed(this.value)" class="w-full bg-zinc-900 cursor-pointer accent-[var(--accent)]">
-                        </div>
-                    </div>
-
-                    <div class="pt-2 border-t border-zinc-800 space-y-3">
-                        <div class="flex items-center justify-center space-x-3">
-                            <button onclick="app.prevParagraph()" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 glow-hover transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
-                            <button id="tts-play-btn" onclick="app.toggleTTSPlayback()" class="flex-1 py-3.5 px-4 rounded-xl bg-[var(--accent)] text-white font-bold shadow-lg glow-hover transition flex items-center justify-center space-x-2">
-                                <svg id="tts-play-icon" class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                <span id="tts-play-text">Read Aloud</span>
-                            </button>
-                            <button onclick="app.nextParagraph()" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 glow-hover transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
-                        </div>
-                        <button onclick="app.stopTTS()" class="w-full py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-semibold glow-hover transition">Stop Audio</button>
-                    </div>
-                </div>
-
-                <!-- Ambient Soundscapes -->
-                <div class="bg-card border border-zinc-800/80 rounded-3xl p-6 shadow-xl space-y-4 glow-hover">
-                    <h3 class="font-bold text-white text-sm">🎧 Ambient Soundscapes</h3>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="app.playAmbient('rain')" class="py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 glow-hover transition text-left">🌧️ Rain Storm</button>
-                        <button onclick="app.playAmbient('fire')" class="py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 glow-hover transition text-left">🔥 Fireplace</button>
-                        <button onclick="app.playAmbient('space')" class="py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 glow-hover transition text-left">🌌 Deep Space</button>
-                        <button onclick="app.playAmbient('off')" class="py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-400 glow-hover transition text-left">🔇 Turn Off</button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-    </main>
-
-    <!-- MODAL: MANUAL ADD -->
-    <div id="modal-manual" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="bg-card border border-zinc-800 w-full max-w-xl rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative glow-hover">
-            <div class="flex items-center justify-between">
-                <h3 class="text-lg font-bold text-white">Paste Story or Light Novel</h3>
-                <button onclick="app.closeManualAddModal()" class="text-zinc-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Book Title</label>
-                    <input type="text" id="manual-title-input" placeholder="e.g. Omniscient Reader Chapter 1" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-200 focus:outline-none glow-hover transition">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Story Text Content</label>
-                    <textarea id="manual-text-input" rows="8" placeholder="Paste your paragraphs here..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-sm text-zinc-200 focus:outline-none resize-none glow-hover transition"></textarea>
-                </div>
-            </div>
-            <div class="flex justify-end space-x-3 pt-2">
-                <button onclick="app.closeManualAddModal()" class="px-5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium text-sm">Cancel</button>
-                <button onclick="app.saveManualBook()" class="px-6 py-2.5 rounded-xl bg-[var(--accent)] text-white font-semibold text-sm shadow-lg glow-hover transition">Save to Library</button>
-            </div>
-        </div>
+<header class="sticky top-0 z-50 glass border-b border-white/5">
+  <div class="max-w-[1500px] mx-auto px-4 md:px-7 h-[70px] flex items-center justify-between">
+    <button onclick="app.showLibrary()" class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-lg glow" style="background:var(--accent)">A</div>
+      <div class="text-left"><div class="font-black tracking-tight">AURA READ</div><div class="text-[10px] uppercase tracking-[.25em] text-slate-500">read • focus • level up</div></div>
+    </button>
+    <div class="flex items-center gap-2">
+      <button class="btn hidden sm:block" onclick="app.openQuotes()">💬 Quote Vault</button>
+      <button class="btn" onclick="app.openSettings()">⚙️ Settings</button>
+      <button class="btn" onclick="app.openAuth()">👤 <span id="nav-user">Guest</span></button>
     </div>
+  </div>
+</header>
 
-    <!-- MODAL: AUTH / ACCOUNT CREATION & LOGIN -->
-    <div id="modal-auth" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="bg-card border border-zinc-800 w-full max-w-md rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative glow-hover">
-            <div class="flex items-center justify-between">
-                <h3 id="auth-modal-title" class="text-lg font-bold text-white">Create Account or Log In</h3>
-                <button onclick="app.closeAuthModal()" class="text-zinc-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-            </div>
-            
-            <div id="auth-logged-in-box" class="hidden space-y-4 text-center">
-                <img id="modal-user-pfp" src="" class="w-20 h-20 rounded-full mx-auto object-cover border-2 border-[var(--accent)] shadow-xl" alt="pfp">
-                <h4 id="modal-username-display" class="font-extrabold text-lg text-white"></h4>
-                <p class="text-xs text-zinc-400">Your account is active & saved on this device. Your XP syncs automatically to the global leaderboard!</p>
-                <button onclick="app.logoutUser()" class="w-full py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-rose-400 font-bold text-xs glow-hover transition">Log Out</button>
-            </div>
-
-            <div id="auth-form-box" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Username</label>
-                    <input type="text" id="auth-username-input" placeholder="e.g. ShadowMonarch" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-200 focus:outline-none glow-hover transition">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Password</label>
-                    <input type="password" id="auth-password-input" placeholder="••••••••" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-200 focus:outline-none glow-hover transition">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Profile Picture (Upload or Default)</label>
-                    <input type="file" id="auth-pfp-input" accept="image/*" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-xs text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[var(--accent)] file:text-white cursor-pointer glow-hover">
-                </div>
-                <div class="pt-2">
-                    <button onclick="app.handleAuthSubmit()" class="w-full py-3.5 rounded-xl bg-[var(--accent)] text-white font-bold text-sm shadow-lg glow-hover transition">Sign Up / Log In</button>
-                </div>
-            </div>
+<main id="library-view">
+  <section class="relative overflow-hidden hero-grid">
+    <div class="orb w-80 h-80 bg-indigo-500/20 left-[-80px] top-[-90px]"></div>
+    <div class="orb w-96 h-96 bg-cyan-500/10 right-[-100px] top-[-120px]"></div>
+    <div class="max-w-[1500px] mx-auto px-5 md:px-8 py-16 md:py-24 relative">
+      <div class="max-w-4xl">
+        <div class="flex flex-wrap gap-2 mb-5">
+          <span class="badge">📚 Personal Library</span><span class="badge">🎧 Text-to-Speech</span><span class="badge">🏆 XP Progress</span>
         </div>
-    </div>
-
-    <!-- MODAL: LEADERBOARD SUITE (Top 100) -->
-    <div id="modal-leaderboard" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="bg-card border border-zinc-800 w-full max-w-2xl rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative glow-hover max-h-[85vh] flex flex-col">
-            <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
-                <div>
-                    <h3 class="text-lg font-bold text-white flex items-center space-x-2">
-                        <span>🏆</span>
-                        <span>Global Reader Leaderboard (Top 100)</span>
-                    </h3>
-                    <p class="text-xs text-zinc-400 mt-0.5">Rankings calculated by total XP (1 XP per 100 words read).</p>
-                </div>
-                <button onclick="app.toggleLeaderboardModal()" class="text-zinc-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-            </div>
-
-            <div id="leaderboard-list-container" class="flex-1 overflow-y-auto space-y-3 pr-2">
-                <!-- Leaderboard entries populated via JS -->
-            </div>
+        <h1 class="hero-title text-5xl md:text-7xl font-black tracking-[-.05em] leading-[.92]">Your books.<br><span style="color:var(--accent)">Your universe.</span></h1>
+        <p class="mt-6 text-slate-400 text-base md:text-lg max-w-2xl leading-8">A cinematic reading workspace for TXT, EPUB and PDF — with focus tools, quotes, voices, themes and a progression system that rewards actual reading. 🚀</p>
+        <div class="flex flex-wrap gap-3 mt-8">
+          <label class="btn btn-accent">📥 Import Book <input id="file-input" class="hidden" type="file" accept=".txt,.epub,.pdf,text/plain,application/epub+zip,application/pdf" onchange="app.handleUpload(event)"></label>
+          <button class="btn" onclick="app.openPaste()">✍️ Paste Story</button>
+          <button class="btn" onclick="app.showLibrary()">📖 Open Library</button>
         </div>
+      </div>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-12">
+        <div class="card stat p-5"><div class="text-2xl">📚</div><div class="text-3xl font-black mt-3" id="stat-books">0</div><div class="text-xs text-slate-500 mt-1">Books</div></div>
+        <div class="card stat p-5"><div class="text-2xl">⚡</div><div class="text-3xl font-black mt-3" id="stat-xp">0</div><div class="text-xs text-slate-500 mt-1">XP</div></div>
+        <div class="card stat p-5"><div class="text-2xl">📝</div><div class="text-3xl font-black mt-3" id="stat-words">0</div><div class="text-xs text-slate-500 mt-1">Words read</div></div>
+        <div class="card stat p-5"><div class="text-2xl">🏅</div><div class="text-3xl font-black mt-3" id="stat-rank">Reader</div><div class="text-xs text-slate-500 mt-1">Current rank</div></div>
+      </div>
     </div>
+  </section>
 
-    <!-- MODAL: ADVANCED SETTINGS & COLOR PALETTE SUITE -->
-    <div id="modal-settings" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="bg-card border border-zinc-800 w-full max-w-lg rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative glow-hover max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between">
-                <h3 class="text-lg font-bold text-white">Reader Customization & Accent Suite</h3>
-                <button onclick="app.toggleSettingsModal()" class="text-zinc-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-            </div>
+  <section class="max-w-[1500px] mx-auto px-5 md:px-8 py-10">
+    <div class="flex flex-wrap gap-2 items-center justify-between mb-5">
+      <div><h2 class="text-2xl font-black">📖 Saved Library</h2><p class="text-sm text-slate-500 mt-1">Everything you import stays in this browser.</p></div>
+      <div class="flex gap-2"><button class="btn" onclick="app.openLeaderboard()">🏆 Leaderboard</button><button class="btn" onclick="app.openQuotes()">💬 Quotes</button></div>
+    </div>
+    <div id="library-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4"></div>
+  </section>
+</main>
 
-            <div class="space-y-6">
-                <!-- Custom Color Palette Picker -->
-                <div class="space-y-3">
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider">Full Color Accent Palette</label>
-                    <div class="flex items-center space-x-4">
-                        <input type="color" id="accent-color-picker" onchange="app.setCustomAccent(this.value)" value="#6366f1" class="w-14 h-14 rounded-2xl bg-zinc-900 border border-zinc-800 cursor-pointer glow-hover p-1">
-                        <div class="flex-1 grid grid-cols-4 gap-2">
-                            <button onclick="app.setCustomAccent('#6366f1')" class="h-10 rounded-xl bg-indigo-500 glow-hover" title="Electric Indigo"></button>
-                            <button onclick="app.setCustomAccent('#06b6d4')" class="h-10 rounded-xl bg-cyan-500 glow-hover" title="Cyberpunk Cyan"></button>
-                            <button onclick="app.setCustomAccent('#10b981')" class="h-10 rounded-xl bg-emerald-500 glow-hover" title="Matrix Emerald"></button>
-                            <button onclick="app.setCustomAccent('#f43f5e')" class="h-10 rounded-xl bg-rose-500 glow-hover" title="Neon Rose"></button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Custom Screen Brightness Dimmer -->
-                <div class="space-y-2">
-                    <div class="flex justify-between text-xs font-semibold text-zinc-400">
-                        <span class="uppercase tracking-wider">Custom Screen Brightness Dimmer</span>
-                        <span id="brightness-label" class="text-[var(--accent)] font-bold">100%</span>
-                    </div>
-                    <input type="range" id="brightness-range" min="0" max="85" step="5" value="0" oninput="app.updateBrightness(this.value)" class="w-full bg-zinc-900 cursor-pointer accent-[var(--accent)]">
-                </div>
-
-                <!-- Expanded Font Options -->
-                <div class="space-y-2">
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider">Font Options</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="app.setFontFamily('jakarta')" id="font-btn-jakarta" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-jakarta text-left glow-hover">Jakarta Modern</button>
-                        <button onclick="app.setFontFamily('sans')" id="font-btn-sans" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-sans text-left glow-hover">Inter Sans</button>
-                        <button onclick="app.setFontFamily('serif')" id="font-btn-serif" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-serif text-left glow-hover">Merriweather Serif</button>
-                        <button onclick="app.setFontFamily('playfair')" id="font-btn-playfair" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-playfair text-left glow-hover">Playfair Display</button>
-                        <button onclick="app.setFontFamily('mono')" id="font-btn-mono" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-mono text-left glow-hover">JetBrains Mono</button>
-                        <button onclick="app.setFontFamily('fira')" id="font-btn-fira" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-fira text-left glow-hover">Fira Code</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pt-4 border-t border-zinc-800">
-                <button onclick="app.toggleSettingsModal()" class="w-full py-3.5 rounded-xl bg-[var(--accent)] text-white font-semibold text-sm shadow-lg glow-hover transition">Apply & Close</button>
-            </div>
+<main id="reader-view" class="hidden">
+  <div class="reader-shell">
+    <div class="reader-layout h-full flex">
+      <aside class="reader-sidebar w-[290px] shrink-0 border-r border-white/5 bg-[#070a12] p-4 overflow-y-auto">
+        <button class="btn w-full mb-4" onclick="app.showLibrary()">← 📚 Library</button>
+        <div class="glass2 rounded-2xl p-4">
+          <div class="text-xs uppercase tracking-widest text-slate-500">Now reading</div>
+          <div id="reader-title" class="font-black text-lg mt-2 break-words">—</div>
+          <div id="reader-format" class="badge mt-3">—</div>
+          <div class="mt-5 text-xs text-slate-500">Reading progress</div>
+          <div class="progress mt-2"><div id="reader-progress" style="width:0%"></div></div>
+          <div id="reader-progress-label" class="text-xs text-slate-400 mt-2">0%</div>
+          <div class="mt-4 text-xs text-slate-500">XP & reading volume</div>
+          <div class="progress mt-2"><div id="xp-progress" style="width:0%"></div></div>
+          <div id="xp-progress-label" class="text-xs text-slate-400 mt-2">0 / 100 words</div>
         </div>
+
+        <div class="mt-4 glass2 rounded-2xl p-4">
+          <div class="font-bold text-sm mb-3">🎨 Reader appearance</div>
+          <div class="flex gap-2">
+            <button class="btn flex-1" onclick="app.changeFontSize(-1)">A−</button><button class="btn flex-1" onclick="app.changeFontSize(1)">A+</button>
+          </div>
+          <select id="font-family" class="input mt-3" onchange="app.setFont(this.value)">
+            <option value="Merriweather">Merriweather</option><option value="Inter">Inter</option><option value="Plus Jakarta Sans">Plus Jakarta Sans</option><option value="Playfair Display">Playfair Display</option><option value="JetBrains Mono">JetBrains Mono</option><option value="Fira Code">Fira Code</option>
+          </select>
+          <div class="text-xs text-slate-500 mt-3">Font size: <span id="font-size-label">20px</span></div>
+          <input id="font-range" class="range mt-1" type="range" min="14" max="32" value="20" oninput="app.setFontSize(+this.value)">
+        </div>
+
+        <div class="mt-4 glass2 rounded-2xl p-4">
+          <div class="font-bold text-sm mb-3">🔊 Voice reader</div>
+          <select id="voice-select" class="input"></select>
+          <div class="flex gap-2 mt-3">
+            <button class="btn flex-1" onclick="app.speakCurrent()">▶️ Read</button><button class="btn flex-1" onclick="app.pauseSpeech()">⏸️ Pause</button><button class="btn flex-1" onclick="app.stopSpeech()">⏹️ Stop</button>
+          </div>
+          <div class="text-xs text-slate-500 mt-3">Speed <span id="speed-label">1.0×</span></div>
+          <input id="speed-range" class="range" type="range" min=".5" max="2" step=".1" value="1" oninput="app.setSpeechRate(+this.value)">
+          <div id="speech-status" class="text-xs text-slate-400 mt-3">Idle</div>
+        </div>
+
+        <div class="mt-4 glass2 rounded-2xl p-4">
+          <div class="font-bold text-sm mb-3">🌧️ Ambient</div>
+          <select id="ambient-select" class="input" onchange="app.playAmbient(this.value)">
+            <option value="off">🔇 Off</option><option value="rain">🌧️ Rain Storm</option><option value="fire">🔥 Fireplace</option><option value="space">🌌 Deep Space</option>
+          </select>
+          <div class="text-[11px] text-slate-500 mt-2">Ambient engine uses browser audio when available.</div>
+        </div>
+
+        <div class="mt-4 glass2 rounded-2xl p-4">
+          <div class="font-bold text-sm mb-3">💡 Quick controls</div>
+          <div class="text-xs text-slate-500 leading-6">Click a TXT paragraph to save a quote. Use <span class="kbd">←</span> <span class="kbd">→</span> for page navigation. Use <span class="kbd">Space</span> to pause voice.</div>
+        </div>
+      </aside>
+
+      <section class="reader-content flex-1 bg-[#0a0d15] p-4 md:p-7">
+        <div class="max-w-[1200px] mx-auto h-full flex flex-col">
+          <div class="flex flex-wrap gap-2 items-center justify-between mb-4">
+            <div><div id="reader-location" class="text-sm text-slate-400">Ready</div><div id="reader-meta" class="text-xs text-slate-600 mt-1"></div></div>
+            <div class="flex gap-2"><button class="btn" onclick="app.toggleFullscreen()">⛶ Fullscreen</button><button class="btn" onclick="app.openReaderSettings()">⚙️ Reader Settings</button></div>
+          </div>
+
+          <div id="reader-stage" class="flex-1 min-h-0 card p-4 md:p-8 overflow-hidden">
+            <div id="txt-reader" class="reader-text reader-content hidden"></div>
+            <div id="epub-viewer-canvas" class="w-full h-full hidden"></div>
+            <div id="pdf-reader" class="w-full h-full overflow-auto hidden"><canvas id="pdf-canvas"></canvas></div>
+            <div id="empty-reader" class="h-full flex items-center justify-center text-center text-slate-500">Choose a book to begin 📖</div>
+          </div>
+
+          <div class="flex items-center justify-between gap-3 mt-4">
+            <button class="btn" onclick="app.previousPage()">← Previous</button>
+            <button class="btn btn-accent" onclick="app.nextPage()">Next →</button>
+          </div>
+        </div>
+      </section>
     </div>
-
-    <!-- Application Script Logic -->
-    <script>
-        class EReaderApp {
-            constructor() {
-                this.currentUser = null; // { username, password, pfp, xp, wordsRead }
-                this.registeredUsers = []; // All stored accounts for cross-device login simulation
-                this.books = [];
-                this.quotes = [];
-                this.currentBookId = null;
-                this.currentParagraphIndex = 0;
-                this.fontSize = 18;
-                this.fontFamily = 'jakarta';
-                this.accentColor = '#6366f1';
-                this.brightness = 0;
-                
-                // EPUB / PDF state
-                this.epubBook = null;
-                this.epubRendition = null;
-                this.pdfDoc = null;
-                this.pdfPageNum = 1;
-                this.pdfTotalPages = 1;
-                this.activeFormat = 'txt'; // 'txt', 'epub', 'pdf'
-
-                // TTS
-                this.synth = window.speechSynthesis;
-                this.voices = [];
-                this.selectedVoice = null;
-                this.speechRate = 1.0;
-                this.isSpeaking = false;
-                this.utterance = null;
-
-                this.initApp();
-            }
-
-            initApp() {
-                this.loadFromStorage();
-                this.loadVoices();
-                if (this.synth.onvoiceschanged !== undefined) {
-                    this.synth.onvoiceschanged = () => this.loadVoices();
-                }
-                this.setCustomAccent(this.accentColor, false);
-                this.renderDashboardStats();
-                this.renderLibrary();
-                this.renderQuotes();
-                this.updateAuthUI();
-            }
-
-            loadFromStorage() {
-                const savedUser = localStorage.getItem('auraread_current_user_v4');
-                const savedAllUsers = localStorage.getItem('auraread_all_users_v4');
-                const savedBooks = localStorage.getItem('auraread_books_v4');
-                const savedQuotes = localStorage.getItem('auraread_quotes_v4');
-                const savedAccent = localStorage.getItem('auraread_accent_v4');
-
-                if (savedUser) { try { this.currentUser = JSON.parse(savedUser); } catch(e) {} }
-                if (savedAllUsers) { try { this.registeredUsers = JSON.parse(savedAllUsers); } catch(e) {} }
-
-                if (savedBooks) {
-                    try { this.books = JSON.parse(savedBooks); } catch(e) { this.books = []; }
-                } else {
-                    this.books = [{
-                        id: 'sample-1',
-                        title: 'The Awakening Hunter (Sample Light Novel)',
-                        coverColor: 'from-indigo-600 to-violet-600',
-                        format: 'txt',
-                        progress: 0,
-                        currentIndex: 0,
-                        paragraphs: [
-                            "Chapter 1: The Lowest Rank Hunter.",
-                            "The dual dungeon gate loomed before us like the open maw of an ancient beast, dark and impenetrable.",
-                            "I gripped my rusty dagger tightly, knuckles turning stark white as an E-rank hunter.",
-                            "[ You have met all the secret requirements of the hidden temple. Do you wish to accept the Quest of the Monarch? ]",
-                            "Without hesitation, in the chilling silence of the cavern, I whispered my choice: 'Accept.'"
-                        ]
-                    }];
-                }
-
-                if (savedQuotes) { try { this.quotes = JSON.parse(savedQuotes); } catch(e) { this.quotes = []; } }
-                if (savedAccent) this.accentColor = savedAccent;
-            }
-
-            saveToStorage() {
-                if (this.currentUser) {
-                    localStorage.setItem('auraread_current_user_v4', JSON.stringify(this.currentUser));
-                    // Update in registered users list
-                    const idx = this.registeredUsers.findIndex(u => u.username === this.currentUser.username);
-                    if (idx >= 0) {
-                        this.registeredUsers[idx] = this.currentUser;
-                    } else {
-                        this.registeredUsers.push(this.currentUser);
-                    }
-                    localStorage.setItem('auraread_all_users_v4', JSON.stringify(this.registeredUsers));
-                }
-                localStorage.setItem('auraread_books_v4', JSON.stringify(this.books));
-                localStorage.setItem('auraread_quotes_v4', JSON.stringify(this.quotes));
-                localStorage.setItem('auraread_accent_v4', this.accentColor);
-            }
-
-            addWordsRead(wordCount) {
-                if (!this.currentUser) {
-                    // Create guest session profile automatically so progress isn't lost
-                    this.currentUser = {
-                        username: 'Reader_' + Math.floor(Math.random() * 9000 + 1000),
-                        password: 'guest',
-                        pfp: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-                        xp: 0,
-                        wordsRead: 0
-                    };
-                }
-                this.currentUser.wordsRead += wordCount;
-                this.currentUser.xp = Math.floor(this.currentUser.wordsRead / 100);
-                this.saveToStorage();
-                this.renderDashboardStats();
-                this.updateAuthUI();
-            }
-
-            renderDashboardStats() {
-                const xp = this.currentUser ? this.currentUser.xp : 0;
-                const words = this.currentUser ? this.currentUser.wordsRead : 0;
-                document.getElementById('stat-total-books').innerText = this.books.length;
-                document.getElementById('stat-xp').innerText = xp + ' XP';
-                document.getElementById('stat-words-read').innerText = words.toLocaleString();
-                document.getElementById('header-xp-count').innerText = xp + ' XP';
-            }
-
-            loadVoices() {
-                this.voices = this.synth.getVoices();
-                const select = document.getElementById('tts-voice-select');
-                if (!select) return;
-                select.innerHTML = this.voices.map((v, i) => `<option value="${i}">${v.name} (${v.lang})</option>`).join('');
-                if (this.voices.length > 0) this.selectedVoice = this.voices[0];
-            }
-
-            setCustomAccent(hex, save = true) {
-                this.accentColor = hex;
-                if (save) this.saveToStorage();
-
-                document.documentElement.style.setProperty('--accent', hex);
-                let r = parseInt(hex.slice(1,3), 16), g = parseInt(hex.slice(3,5), 16), b = parseInt(hex.slice(5,7), 16);
-                document.documentElement.style.setProperty('--accent-glow', `rgba(${r}, ${g}, ${b}, 0.4)`);
-                document.documentElement.style.setProperty('--accent-border', `rgba(${r}, ${g}, ${b}, 0.7)`);
-
-                const picker = document.getElementById('accent-color-picker');
-                if (picker) picker.value = hex;
-            }
-
-            updateBrightness(val) {
-                this.brightness = parseInt(val);
-                document.getElementById('brightness-label').innerText = (100 - val) + '%';
-                document.getElementById('brightness-overlay').style.opacity = (val / 100).toString();
-            }
-
-            switchTab(tab) {
-                if (tab === 'library') {
-                    document.getElementById('tab-content-library').classList.remove('hidden');
-                    document.getElementById('tab-content-quotes').classList.add('hidden');
-                    document.getElementById('tab-btn-library').className = 'text-base font-bold text-white border-b-2 border-[var(--accent)] pb-1 transition';
-                    document.getElementById('tab-btn-quotes').className = 'text-base font-medium text-zinc-400 hover:text-white pb-1 transition';
-                } else {
-                    document.getElementById('tab-content-library').classList.add('hidden');
-                    document.getElementById('tab-content-quotes').classList.remove('hidden');
-                    document.getElementById('tab-btn-quotes').className = 'text-base font-bold text-white border-b-2 border-[var(--accent)] pb-1 transition';
-                    document.getElementById('tab-btn-library').className = 'text-base font-medium text-zinc-400 hover:text-white pb-1 transition';
-                }
-            }
-
-            renderLibrary() {
-                const grid = document.getElementById('books-grid');
-                grid.innerHTML = this.books.map(book => `
-                    <div onclick="app.openBook('${book.id}')" class="group bg-card hover:bg-cardhover border border-zinc-800 rounded-3xl p-6 cursor-pointer glow-hover transition shadow-xl flex flex-col justify-between space-y-4 relative overflow-hidden">
-                        <div class="space-y-3">
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr ${book.coverColor || 'from-indigo-600 to-violet-600'} flex items-center justify-center text-white font-bold text-lg uppercase">${book.format || 'txt'}</div>
-                            <h4 class="font-bold text-white text-base line-clamp-2 group-hover:text-[var(--accent)] transition">${book.title}</h4>
-                            <p class="text-xs text-zinc-500 uppercase font-semibold">${book.format ? book.format.toUpperCase() : 'TXT'} Format</p>
-                        </div>
-                        <div class="pt-4 border-t border-zinc-800 flex items-center justify-between text-xs">
-                            <span class="text-zinc-400">Progress: ${book.progress || 0}%</span>
-                            <span class="text-[var(--accent)] font-bold">Read Now →</span>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            renderQuotes() {
-                const grid = document.getElementById('quotes-grid');
-                if (this.quotes.length === 0) {
-                    grid.innerHTML = `<p class="col-span-full text-zinc-500 text-sm py-12 text-center bg-card rounded-3xl border border-zinc-800">No quotes saved yet. Click any paragraph inside a book reader to save it here!</p>`;
-                    return;
-                }
-                grid.innerHTML = this.quotes.map((q, idx) => `
-                    <div class="bg-card border border-zinc-800 rounded-3xl p-6 space-y-3 glow-hover">
-                        <p class="text-sm italic text-zinc-300">"${q.text}"</p>
-                        <div class="flex items-center justify-between pt-3 border-t border-zinc-800 text-xs text-zinc-500">
-                            <span class="font-semibold text-zinc-400">${q.bookTitle}</span>
-                            <button onclick="app.deleteQuote(${idx})" class="text-rose-400 hover:underline">Delete</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            saveQuote(text, bookTitle) {
-                this.quotes.unshift({ text, bookTitle });
-                this.saveToStorage();
-                this.renderQuotes();
-                alert('Quote saved to your vault!');
-            }
-
-            deleteQuote(idx) {
-                this.quotes.splice(idx, 1);
-                this.saveToStorage();
-                this.renderQuotes();
-            }
-
-            openBook(id) {
-                this.currentBookId = id;
-                const book = this.books.find(b => b.id === id);
-                if (!book) return;
-                this.currentParagraphIndex = book.currentIndex || 0;
-                this.activeFormat = book.format || 'txt';
-
-                document.getElementById('view-library').classList.add('hidden');
-                document.getElementById('view-reader').classList.remove('hidden');
-                document.getElementById('reader-nav-controls').classList.remove('hidden');
-                document.getElementById('reader-nav-controls').classList.add('flex');
-                document.getElementById('reader-book-title').innerText = book.title;
-
-                if (this.activeFormat === 'epub') {
-                    document.getElementById('reader-pagination-controls').classList.remove('hidden');
-                    this.renderEpubBook(book);
-                } else if (this.activeFormat === 'pdf') {
-                    document.getElementById('reader-pagination-controls').classList.remove('hidden');
-                    this.renderPdfBook(book);
-                } else {
-                    document.getElementById('reader-pagination-controls').classList.add('hidden');
-                    this.renderReaderContent();
-                }
-            }
-
-            showLibrary() {
-                this.stopTTS();
-                document.getElementById('view-reader').classList.add('hidden');
-                document.getElementById('reader-nav-controls').classList.remove('flex');
-                document.getElementById('reader-nav-controls').classList.add('hidden');
-                document.getElementById('view-library').classList.remove('hidden');
-                this.renderDashboardStats();
-                this.renderLibrary();
-            }
-
-            renderReaderContent() {
-                const book = this.books.find(b => b.id === this.currentBookId);
-                if (!book || book.format === 'epub' || book.format === 'pdf') return;
-
-                const contentBox = document.getElementById('reader-content-box');
-                let fontClass = 'font-jakarta';
-                if (this.fontFamily === 'sans') fontClass = 'font-sans';
-                if (this.fontFamily === 'serif') fontClass = 'font-serif';
-                if (this.fontFamily === 'playfair') fontClass = 'font-playfair';
-                if (this.fontFamily === 'mono') fontClass = 'font-mono';
-                if (this.fontFamily === 'fira') fontClass = 'font-fira';
-
-                contentBox.innerHTML = `
-                    <div class="absolute top-4 right-4 text-[11px] text-zinc-500 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800 pointer-events-none">
-                        💡 Click paragraph to save quote
-                    </div>
-                ` + book.paragraphs.map((p, idx) => `
-                    <p id="para-${idx}" onclick="app.handleParagraphClick(${idx}, '${book.title.replace(/'/g, "\\'")}')" class="${fontClass} text-zinc-300 mb-6 cursor-pointer hover:text-white transition rounded-xl p-3 ${idx === this.currentParagraphIndex ? 'tts-highlight text-white' : ''}" style="font-size: ${this.fontSize}px;">
-                        ${p}
-                    </p>
-                `).join('');
-
-                const progress = Math.round((this.currentParagraphIndex / Math.max(1, book.paragraphs.length - 1)) * 100);
-                const baseSizeFactor = this.fontSize / 18;
-                const densityPercentage = Math.min(100, Math.round((progress * 0.7) + (baseSizeFactor * 10)));
-
-                book.progress = progress;
-                book.currentIndex = this.currentParagraphIndex;
-                this.saveToStorage();
-                this.addWordsRead(25); // Award words read for navigating paragraphs
-
-                document.getElementById('reader-progress-indicator').innerText = `Progress: ${progress}% read (Paragraph ${this.currentParagraphIndex + 1} of ${book.paragraphs.length})`;
-                document.getElementById('progress-percent-label').innerText = `${progress}%`;
-                document.getElementById('progress-words-label').innerText = `${this.currentUser ? this.currentUser.wordsRead : 0} total words read`;
-                
-                document.getElementById('reader-progress-bar-fill').style.width = progress + '%';
-                document.getElementById('reader-density-bar-fill').style.width = densityPercentage + '%';
-            }
-
-            renderEpubBook(book) {
-                const contentBox = document.getElementById('reader-content-box');
-                contentBox.innerHTML = `<div id="epub-viewer-canvas" class="w-full h-[650px]"></div>`;
-                try {
-                    const binaryString = atob(book.base64Data);
-                    const len = binaryString.length;
-                    const bytes = new Uint8Array(len);
-                    for (let i = 0; i < len; i++) { bytes[i] = binaryString.charCodeAt(i); }
-                    
-                    this.epubBook = ePub(bytes.buffer);
-                    this.epubRendition = this.epubBook.renderTo("epub-viewer-canvas", { width: "100%", height: "100%" });
-                    this.epubRendition.display();
-                    document.getElementById('reader-page-indicator').innerText = 'EPUB Loaded';
-                    this.addWordsRead(150);
-                } catch(e) {
-                    contentBox.innerHTML = `<p class="text-rose-400">Error loading EPUB book file. Try uploading again.</p>`;
-                }
-            }
-
-            async renderPdfBook(book) {
-                const contentBox = document.getElementById('reader-content-box');
-                contentBox.innerHTML = `<canvas id="pdf-canvas" class="mx-auto shadow-2xl rounded-2xl max-w-full"></canvas>`;
-                try {
-                    const binaryString = atob(book.base64Data);
-                    const len = binaryString.length;
-                    const bytes = new Uint8Array(len);
-                    for (let i = 0; i < len; i++) { bytes[i] = binaryString.charCodeAt(i); }
-
-                    this.pdfDoc = await pdfjsLib.getDocument({ data: bytes }).promise;
-                    this.pdfTotalPages = this.pdfDoc.numPages;
-                    this.renderPdfPage(this.pdfPageNum);
-                } catch(e) {
-                    contentBox.innerHTML = `<p class="text-rose-400">Error loading PDF document.</p>`;
-                }
-            }
-
-            async renderPdfPage(num) {
-                const page = await this.pdfDoc.getPage(num);
-                const canvas = document.getElementById('pdf-canvas');
-                const ctx = canvas.getContext('2d');
-                const viewport = page.getViewport({ scale: 1.3 });
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-
-                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-                document.getElementById('reader-page-indicator').innerText = `Page ${num} of ${this.pdfTotalPages}`;
-                const prog = Math.round((num / this.pdfTotalPages) * 100);
-                document.getElementById('reader-progress-bar-fill').style.width = prog + '%';
-                document.getElementById('progress-percent-label').innerText = prog + '%';
-                this.addWordsRead(100);
-            }
-
-            nextReaderPage() {
-                if (this.activeFormat === 'epub' && this.epubRendition) {
-                    this.epubRendition.next();
-                } else if (this.activeFormat === 'pdf' && this.pdfDoc && this.pdfPageNum < this.pdfTotalPages) {
-                    this.pdfPageNum++;
-                    this.renderPdfPage(this.pdfPageNum);
-                }
-            }
-
-            prevReaderPage() {
-                if (this.activeFormat === 'epub' && this.epubRendition) {
-                    this.epubRendition.prev();
-                } else if (this.activeFormat === 'pdf' && this.pdfDoc && this.pdfPageNum > 1) {
-                    this.pdfPageNum--;
-                    this.renderPdfPage(this.pdfPageNum);
-                }
-            }
-
-            handleParagraphClick(idx, bookTitle) {
-                const book = this.books.find(b => b.id === this.currentBookId);
-                if (book && book.paragraphs[idx]) {
-                    if (confirm('Save this sentence to your Quote Vault?')) {
-                        this.saveQuote(book.paragraphs[idx], bookTitle);
-                    }
-                }
-            }
-
-            nextParagraph() {
-                const book = this.books.find(b => b.id === this.currentBookId);
-                if (book && this.currentParagraphIndex < book.paragraphs.length - 1) {
-                    this.currentParagraphIndex++;
-                    this.addWordsRead(25);
-                    this.renderReaderContent();
-                    if (this.isSpeaking) this.restartTTS();
-                }
-            }
-
-            prevParagraph() {
-                if (this.currentParagraphIndex > 0) {
-                    this.currentParagraphIndex--;
-                    this.renderReaderContent();
-                    if (this.isSpeaking) this.restartTTS();
-                }
-            }
-
-            adjustFontSize(delta) {
-                this.fontSize = Math.max(14, Math.min(32, this.fontSize + delta));
-                if (this.activeFormat === 'txt') this.renderReaderContent();
-            }
-
-            setFontFamily(fam) {
-                this.fontFamily = fam;
-                if (this.activeFormat === 'txt') this.renderReaderContent();
-            }
-
-            // TTS Core with XP Reward
-            toggleTTSPlayback() {
-                if (this.isSpeaking) { this.pauseTTS(); } else { this.startTTS(); }
-            }
-
-            startTTS() {
-                const book = this.books.find(b => b.id === this.currentBookId);
-                if (!book || !book.paragraphs || !book.paragraphs[this.currentParagraphIndex]) return;
-
-                this.utterance = new SpeechSynthesisUtterance(book.paragraphs[this.currentParagraphIndex]);
-                this.utterance.rate = this.speechRate;
-                if (this.voices[this.selectedVoice]) this.utterance.voice = this.voices[this.selectedVoice];
-
-                this.utterance.onstart = () => {
-                    this.isSpeaking = true;
-                    document.getElementById('tts-status-badge').innerText = 'Speaking (+XP)';
-                    document.getElementById('tts-status-badge').className = 'px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-[var(--accent)]/20 text-[var(--accent)] border border-[var(--accent-border)]';
-                    document.getElementById('tts-play-text').innerText = 'Pause';
-                };
-
-                this.utterance.onend = () => {
-                    this.addWordsRead(30); // TTS speech listening rewards XP
-                    if (this.currentParagraphIndex < book.paragraphs.length - 1) {
-                        this.currentParagraphIndex++;
-                        this.renderReaderContent();
-                        this.startTTS();
-                    } else {
-                        this.stopTTS();
-                    }
-                };
-
-                this.synth.speak(this.utterance);
-                this.renderReaderContent();
-            }
-
-            pauseTTS() {
-                this.synth.cancel();
-                this.isSpeaking = false;
-                document.getElementById('tts-status-badge').innerText = 'Paused';
-                document.getElementById('tts-play-text').innerText = 'Resume';
-            }
-
-            stopTTS() {
-                this.synth.cancel();
-                this.isSpeaking = false;
-                document.getElementById('tts-status-badge').innerText = 'Idle';
-                document.getElementById('tts-status-badge').className = 'px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-zinc-900 text-zinc-400 border border-zinc-800';
-                document.getElementById('tts-play-text').innerText = 'Read Aloud';
-            }
-
-            restartTTS() { this.stopTTS(); this.startTTS(); }
-            changeVoice(idx) { this.selectedVoice = idx; if (this.isSpeaking) this.restartTTS(); }
-            updateSpeed(val) { this.speechRate = parseFloat(val); document.getElementById('tts-speed-label').innerText = val + 'x'; if (this.isSpeaking) this.restartTTS(); }
-
-            playAmbient(type) {
-                if (type === 'off') return alert('Ambient audio turned off.');
-                alert(`Started ${type} immersive soundscape simulation!`);
-            }
-
-            // File Upload handler (TXT, EPUB, PDF)
-            handleFileUpload(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-                const fileName = file.name;
-                const ext = fileName.split('.').pop().toLowerCase();
-
-                const reader = new FileReader();
-                if (ext === 'txt') {
-                    reader.onload = (e) => {
-                        const text = e.target.result;
-                        const paragraphs = text.split(/\r?\n+/).filter(p => p.trim().length > 0);
-                        const newBook = { id: 'book-' + Date.now(), title: fileName.replace(/\.[^/.]+$/, ""), coverColor: 'from-violet-600 to-indigo-600', format: 'txt', progress: 0, currentIndex: 0, paragraphs: paragraphs.length ? paragraphs : [text] };
-                        this.books.unshift(newBook);
-                        this.saveToStorage();
-                        this.renderLibrary();
-                        this.openBook(newBook.id);
-                    };
-                    reader.readAsText(file);
-                } else if (ext === 'epub' || ext === 'pdf') {
-                    reader.onload = (e) => {
-                        const base64String = e.target.result.split(',')[1];
-                        const newBook = { id: 'book-' + Date.now(), title: fileName.replace(/\.[^/.]+$/, ""), coverColor: 'from-cyan-600 to-blue-600', format: ext, progress: 0, currentIndex: 0, base64Data: base64String, paragraphs: [`Viewing ${ext.toUpperCase()} document.`] };
-                        this.books.unshift(newBook);
-                        this.saveToStorage();
-                        this.renderLibrary();
-                        this.openBook(newBook.id);
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    alert('Unsupported format. Please upload .txt, .epub, or .pdf files.');
-                }
-            }
-
-            openManualAddModal() { document.getElementById('modal-manual').classList.remove('hidden'); }
-            closeManualAddModal() { document.getElementById('modal-manual').classList.add('hidden'); }
-            saveManualBook() {
-                const title = document.getElementById('manual-title-input').value.trim() || 'Untitled Light Novel';
-                const text = document.getElementById('manual-text-input').value.trim();
-                if (!text) return alert('Please enter text.');
-                const paragraphs = text.split(/\r?\n+/).filter(p => p.trim().length > 0);
-                const newBook = { id: 'book-' + Date.now(), title, coverColor: 'from-emerald-600 to-teal-600', format: 'txt', progress: 0, currentIndex: 0, paragraphs };
-                this.books.unshift(newBook);
-                this.saveToStorage();
-                this.closeManualAddModal();
-                this.renderLibrary();
-                this.openBook(newBook.id);
-            }
-
-            // Auth & Account Methods
-            openAuthModal() {
-                document.getElementById('modal-auth').classList.remove('hidden');
-                if (this.currentUser) {
-                    document.getElementById('auth-logged-in-box').classList.remove('hidden');
-                    document.getElementById('auth-form-box').classList.add('hidden');
-                    document.getElementById('modal-user-pfp').src = this.currentUser.pfp;
-                    document.getElementById('modal-username-display').innerText = '@' + this.currentUser.username;
-                    document.getElementById('auth-modal-title').innerText = 'Account Settings';
-                } else {
-                    document.getElementById('auth-logged-in-box').classList.add('hidden');
-                    document.getElementById('auth-form-box').classList.remove('hidden');
-                    document.getElementById('auth-modal-title').innerText = 'Create Account or Log In';
-                }
-            }
-
-            closeAuthModal() { document.getElementById('modal-auth').classList.add('hidden'); }
-
-            handleAuthSubmit() {
-                const username = document.getElementById('auth-username-input').value.trim();
-                const password = document.getElementById('auth-password-input').value.trim();
-                const pfpInput = document.getElementById('auth-pfp-input');
-
-                if (!username || !password) {
-                    return alert('Please enter both username and password.');
-                }
-
-                let pfpUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
-                if (pfpInput.files && pfpInput.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        pfpUrl = e.target.result;
-                        this.finalizeAuth(username, password, pfpUrl);
-                    };
-                    reader.readAsDataURL(pfpInput.files[0]);
-                } else {
-                    this.finalizeAuth(username, password, pfpUrl);
-                }
-            }
-
-            finalizeAuth(username, password, pfp) {
-                // Check if account exists in registered users
-                let existing = this.registeredUsers.find(u => u.username.toLowerCase() === username.toLowerCase());
-                if (existing) {
-                    if (existing.password !== password) {
-                        return alert('Incorrect password for this username. Please try again.');
-                    }
-                    this.currentUser = existing;
-                } else {
-                    // Create new account
-                    this.currentUser = { username, password, pfp, xp: 0, wordsRead: 0 };
-                    this.registeredUsers.push(this.currentUser);
-                }
-                this.saveToStorage();
-                this.closeAuthModal();
-                this.updateAuthUI();
-                this.renderDashboardStats();
-                alert(`Welcome, @${this.currentUser.username}! Your account is logged in.`);
-            }
-
-            logoutUser() {
-                this.currentUser = null;
-                localStorage.removeItem('auraread_current_user_v4');
-                this.closeAuthModal();
-                this.updateAuthUI();
-                this.renderDashboardStats();
-                alert('Logged out successfully.');
-            }
-
-            updateAuthUI() {
-                if (this.currentUser) {
-                    document.getElementById('auth-login-btn').classList.add('hidden');
-                    document.getElementById('auth-user-badge').classList.remove('hidden');
-                    document.getElementById('auth-user-badge').classList.add('flex');
-                    document.getElementById('nav-user-pfp').src = this.currentUser.pfp;
-                    document.getElementById('nav-username-label').innerText = '@' + this.currentUser.username;
-                } else {
-                    document.getElementById('auth-login-btn').classList.remove('hidden');
-                    document.getElementById('auth-user-badge').classList.remove('flex');
-                    document.getElementById('auth-user-badge').classList.add('hidden');
-                }
-            }
-
-            // Leaderboard Suite (Top 100 with unique top 3 titles)
-            toggleLeaderboardModal() {
-                const modal = document.getElementById('modal-leaderboard');
-                modal.classList.toggle('hidden');
-                if (!modal.classList.contains('hidden')) {
-                    this.renderLeaderboardList();
-                }
-            }
-
-            renderLeaderboardList() {
-                const container = document.getElementById('leaderboard-list-container');
-                
-                // Combine registered users with simulated global readers if list is sparse
-                let list = [...this.registeredUsers];
-                if (this.currentUser && !list.some(u => u.username === this.currentUser.username)) {
-                    list.push(this.currentUser);
-                }
-
-                // Sort by XP descending
-                list.sort((a, b) => b.xp - a.xp);
-
-                // If not enough users, add mockup high-level readers so leaderboard looks stunning
-                const mockNames = ['ShadowMonarch', 'OmniscientReader', 'SungJinWoo', 'SoloLevelingFan', 'LightNovelMaster', 'KnjigeVojvoda', 'AuraSeeker', 'VortexReader', 'CyberKnight', 'ZenithMage'];
-                while(list.length < 15) {
-                    let randXp = Math.floor(Math.random() * 5000 + 200);
-                    let mName = mockNames[list.length % mockNames.length] + (list.length > 10 ? list.length : '');
-                    if (!list.some(u => u.username === mName)) {
-                        list.push({ username: mName, xp: randXp, pfp: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150' });
-                    }
-                }
-
-                // Slice top 100
-                list = list.slice(0, 100);
-
-                container.innerHTML = list.map((user, idx) => {
-                    let rankBadge = `#${idx + 1}`;
-                    let titleHTML = '';
-                    let cardBg = 'bg-card';
-
-                    if (idx === 0) {
-                        rankBadge = '👑 1st';
-                        titleHTML = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-400 border border-amber-500/40">👑 Sovereign of Reading</span>`;
-                        cardBg = 'bg-gradient-to-r from-amber-500/10 via-card to-card border-amber-500/50';
-                    } else if (idx === 1) {
-                        rankBadge = '🥈 2nd';
-                        titleHTML = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-zinc-300/20 text-zinc-200 border border-zinc-300/40">🥈 Grandmaster Scholar</span>`;
-                        cardBg = 'bg-gradient-to-r from-zinc-400/10 via-card to-card border-zinc-400/40';
-                    } else if (idx === 2) {
-                        rankBadge = '🥉 3rd';
-                        titleHTML = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-700/20 text-amber-600 border border-amber-700/40">🥉 Elite Chronologer</span>`;
-                        cardBg = 'bg-gradient-to-r from-amber-700/10 via-card to-card border-amber-700/40';
-                    }
-
-                    const isCurrent = this.currentUser && user.username === this.currentUser.username;
-
-                    return `
-                        <div class="flex items-center justify-between p-4 rounded-2xl border border-zinc-800 ${cardBg} glow-hover ${isCurrent ? 'ring-2 ring-[var(--accent)]' : ''}">
-                            <div class="flex items-center space-x-4">
-                                <span class="font-extrabold text-sm w-12 text-zinc-400">${rankBadge}</span>
-                                <img src="${user.pfp || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}" class="w-10 h-10 rounded-full object-cover border border-zinc-700" alt="pfp">
-                                <div>
-                                    <h4 class="font-bold text-white text-sm flex items-center space-x-2">
-                                        <span>@${user.username}</span>
-                                        ${isCurrent ? '<span class="text-[10px] bg-[var(--accent)] text-white px-1.5 py-0.5 rounded">You</span>' : ''}
-                                    </h4>
-                                    <div class="mt-1">${titleHTML}</div>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <span class="font-extrabold text-base text-[var(--accent)]">${user.xp || 0} XP</span>
-                                <p class="text-[10px] text-zinc-500 uppercase">Total Score</p>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            toggleSettingsModal() { document.getElementById('modal-settings').classList.toggle('hidden'); }
-        }
-
-        const app = new EReaderApp();
-    </script>
+  </div>
+</main>
+
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+const DB_NAME="AuraReadDB_v2", DB_STORE="files";
+const LS_BOOKS="auraread_books_v5", LS_QUOTES="auraread_quotes_v5", LS_USERS="auraread_all_users_v5", LS_CURRENT="auraread_current_user_v5", LS_ACCENT="auraread_accent_v5", LS_PREFS="auraread_prefs_v5";
+
+class EReaderApp{
+ constructor(){
+  this.books=this.load(LS_BOOKS,[]);
+  this.quotes=this.load(LS_QUOTES,[]);
+  this.users=this.load(LS_USERS,[]);
+  this.currentUser=this.load(LS_CURRENT,null);
+  this.prefs=this.load(LS_PREFS,{fontSize:20,fontFamily:"Merriweather",brightness:0,speechRate:1,accent:this.load(LS_ACCENT,"#818cf8")});
+  this.currentBookId=null;this.currentBook=null;this.currentParagraphIndex=0;
+  this.epubBook=null;this.epubRendition=null;this.pdfDoc=null;this.pdfPageNum=1;this.pdfTotalPages=0;this.pdfPageWordCounts={};
+  this.speechIndex=0;this.speechRate=this.prefs.speechRate||1;this.ambientCtx=null;this.ambientSource=null;
+  this.init();
+ }
+ load(k,f){try{let x=localStorage.getItem(k);return x?JSON.parse(x):f}catch{return f}}
+ save(k,v){localStorage.setItem(k,JSON.stringify(v))}
+ init(){
+  this.applyPrefs();this.refreshVoices();speechSynthesis.onvoiceschanged=()=>this.refreshVoices();
+  if(!this.currentUser){this.currentUser={id:"guest_"+Date.now(),username:"Guest",xp:0,wordsRead:0,guest:true};}
+  this.updateUserUI();this.renderLibrary();this.bindKeys();
+ }
+ toast(msg){const r=document.getElementById("toast-root");r.innerHTML='<div class="toast">'+msg+'</div>';setTimeout(()=>r.innerHTML="",3000)}
+ showLibrary(){this.stopSpeech();document.getElementById("reader-view").classList.add("hidden");document.getElementById("library-view").classList.remove("hidden");this.renderLibrary()}
+ openReader(id){const b=this.books.find(x=>x.id===id);if(!b)return;this.currentBook=b;this.currentBookId=id;this.currentParagraphIndex=b.currentIndex||0;this.pdfPageNum=b.pdfPageNum||1;this.stopSpeech();document.getElementById("library-view").classList.add("hidden");document.getElementById("reader-view").classList.remove("hidden");document.getElementById("reader-title").textContent=b.title;document.getElementById("reader-format").textContent=b.format.toUpperCase();this.loadBook()}
+ renderLibrary(){
+  const grid=document.getElementById("library-grid");
+  grid.innerHTML="";
+  if(!this.books.length){grid.innerHTML='<div class="col-span-full card p-12 text-center"><div class="text-5xl">📚</div><div class="text-xl font-black mt-4">Your library is empty</div><div class="text-slate-500 mt-2">Import a TXT, EPUB or PDF to begin.</div></div>';this.updateStats();return}
+  this.books.forEach(b=>{
+   const p=this.getBookProgress(b);
+   const el=document.createElement("div");el.className="book-card card p-3";
+   el.innerHTML='<div class="cover mb-3">'+(b.cover?'<img class="w-full h-full object-cover" src="'+b.cover+'">':'<div class="text-center p-4"><div class="text-4xl">📖</div><div class="font-black text-sm mt-3">'+this.escape(b.title)+'</div></div>')+'</div><div class="font-bold truncate">'+this.escape(b.title)+'</div><div class="flex justify-between mt-2 text-[11px] text-slate-500"><span>'+b.format.toUpperCase()+'</span><span>'+p+'%</span></div><div class="progress mt-2"><div style="width:'+p+'%"></div></div><button class="btn w-full mt-3">📖 Continue</button>';
+   el.onclick=()=>this.openReader(b.id);grid.appendChild(el)
+  });this.updateStats();
+ }
+ updateStats(){
+  const words=this.currentUser?.wordsRead||0,xp=Math.floor(words/100);
+  document.getElementById("stat-books").textContent=this.books.length;
+  document.getElementById("stat-xp").textContent=xp;
+  document.getElementById("stat-words").textContent=words.toLocaleString();
+  document.getElementById("stat-rank").textContent=this.rankForXP(xp);
+  this.updateUserUI()
+ }
+ updateUserUI(){document.getElementById("nav-user").textContent=this.currentUser?.username||"Guest"}
+ rankForXP(x){if(x>=5000)return"Sovereign";if(x>=2500)return"Grandmaster";if(x>=1000)return"Elite";if(x>=500)return"Scholar";return"Reader"}
+ getBookProgress(b){if(b.format==="txt")return Math.min(100,Math.round(((b.currentIndex||0)+1)/(b.paragraphs?.length||1)*100));if(b.format==="pdf")return b.totalPages?Math.round((b.pdfPageNum||1)/b.totalPages*100):0;return b.progress||0}
+ async handleUpload(e){
+  const file=e.target.files?.[0];e.target.value="";if(!file)return;
+  try{
+   const ext=file.name.toLowerCase().split(".").pop();
+   if(!["txt","epub","pdf"].includes(ext))throw new Error("Supported formats: TXT, EPUB, PDF");
+   this.toast("⏳ Importing "+file.name+"…");
+   const id="book_"+Date.now()+"_"+Math.random().toString(36).slice(2);
+   if(ext==="txt"){
+    const text=await file.text(), paragraphs=text.split(/(?:\r?\n\s*){2,}/).map(x=>x.trim()).filter(Boolean);
+    if(!paragraphs.length)throw new Error("TXT file has no readable text.");
+    const b={id,title:file.name.replace(/\.[^.]+$/,""),format:"txt",paragraphs,currentIndex:0,createdAt:Date.now(),readWords:0};
+    this.books.unshift(b);this.save(LS_BOOKS,this.books);this.toast("✅ TXT imported");this.renderLibrary();return;
+   }
+   const buffer=await file.arrayBuffer();
+   await dbPut(id,new Blob([buffer],{type:file.type||("."+ext)}));
+   let b={id,title:file.name.replace(/\.[^.]+$/,""),format:ext,createdAt:Date.now(),progress:0,readWords:0};
+   if(ext==="pdf"){const pdf=await pdfjsLib.getDocument({data:new Uint8Array(buffer)}).promise;b.totalPages=pdf.numPages;b.pdfPageNum=1;await pdf.destroy()}
+   this.books.unshift(b);this.save(LS_BOOKS,this.books);this.toast("✅ "+ext.toUpperCase()+" imported");this.renderLibrary();
+  }catch(err){console.error(err);this.toast("❌ Upload failed: "+err.message)}
+ }
+ async loadBook(){
+  const b=this.currentBook;this.hideStages();
+  if(b.format==="txt"){document.getElementById("txt-reader").classList.remove("hidden");this.renderTXT();return}
+  if(b.format==="pdf"){document.getElementById("pdf-reader").classList.remove("hidden");await this.loadPDF();return}
+  if(b.format==="epub"){document.getElementById("epub-viewer-canvas").classList.remove("hidden");await this.loadEPUB();return}
+ }
+ hideStages(){["txt-reader","epub-viewer-canvas","pdf-reader"].forEach(id=>document.getElementById(id).classList.add("hidden"));document.getElementById("empty-reader").classList.add("hidden")}
+ renderTXT(){
+  const c=document.getElementById("txt-reader");c.innerHTML="";
+  this.currentBook.paragraphs.forEach((p,i)=>{const el=document.createElement("p");el.dataset.i=i;el.textContent=p;if(i===this.currentParagraphIndex)el.classList.add("active");el.onclick=()=>this.saveQuote(p);c.appendChild(el)});
+  this.scrollTXT();this.updateReaderProgress();this.readerMeta("Paragraph "+(this.currentParagraphIndex+1)+" / "+this.currentBook.paragraphs.length);
+ }
+ scrollTXT(){const el=document.querySelector('#txt-reader p[data-i="'+this.currentParagraphIndex+'"]');el?.scrollIntoView({block:"center",behavior:"smooth"})}
+ async loadEPUB(){
+  try{
+   if(this.epubRendition){try{this.epubRendition.destroy()}catch{}}
+   const blob=await dbGet(this.currentBook.id);if(!blob)throw new Error("EPUB data not found.");
+   const buf=await blob.arrayBuffer();
+   this.epubBook=ePub(buf);
+   const box=document.getElementById("epub-viewer-canvas");box.innerHTML="";
+   this.epubRendition=this.epubBook.renderTo(box,{width:"100%",height:"100%",flow:"paginated",spread:"none"});
+   this.epubRendition.on("relocated",loc=>{
+    if(loc?.start?.cfi){this.currentBook.epubCfi=loc.start.cfi;this.currentBook.progress=Math.round((loc.start?.percentage||0)*100);this.persistBook();this.updateReaderProgress()}
+    this.readerMeta("EPUB • "+Math.round((loc?.start?.percentage||0)*100)+"%")
+   });
+   await this.epubRendition.display(this.currentBook.epubCfi||undefined);
+   this.updateReaderProgress();
+  }catch(e){console.error(e);this.toast("❌ EPUB couldn't be opened: "+e.message)}
+ }
+ async loadPDF(){
+  try{
+   const blob=await dbGet(this.currentBook.id);if(!blob)throw new Error("PDF data not found.");
+   const buf=new Uint8Array(await blob.arrayBuffer());
+   this.pdfDoc=await pdfjsLib.getDocument({data:buf}).promise;this.pdfTotalPages=this.pdfDoc.numPages;this.currentBook.totalPages=this.pdfTotalPages;
+   this.pdfPageNum=Math.min(Math.max(this.currentBook.pdfPageNum||1,1),this.pdfTotalPages);
+   await this.renderPDFPage(this.pdfPageNum);
+  }catch(e){console.error(e);this.toast("❌ PDF couldn't be opened: "+e.message)}
+ }
+ async renderPDFPage(num){
+  if(!this.pdfDoc)return;num=Math.min(Math.max(num,1),this.pdfTotalPages);this.pdfPageNum=num;this.currentBook.pdfPageNum=num;
+  const page=await this.pdfDoc.getPage(num),vp=page.getViewport({scale:1.45}),canvas=document.getElementById("pdf-canvas"),ctx=canvas.getContext("2d");
+  canvas.width=vp.width;canvas.height=vp.height;await page.render({canvasContext:ctx,viewport:vp}).promise;
+  try{const tc=await page.getTextContent();const words=tc.items.map(x=>x.str).join(" ").trim().split(/\s+/).filter(Boolean).length;this.pdfPageWordCounts[num]=words;this.markPageRead(num,words)}catch{}
+  this.persistBook();this.updateReaderProgress();this.readerMeta("PDF • Page "+num+" / "+this.pdfTotalPages);document.getElementById("pdf-reader").scrollTop=0
+ }
+ markPageRead(page,words){
+  const key="p"+page;if(this.currentBook.readPages?.includes(key))return;
+  this.currentBook.readPages=this.currentBook.readPages||[];this.currentBook.readPages.push(key);this.addWordsRead(words,this.currentBook.id)
+ }
+ addWordsRead(words,bookId){
+  words=Math.max(0,Math.floor(words||0));if(!words)return;
+  const u=this.currentUser;u.wordsRead=(u.wordsRead||0)+words;u.xp=Math.floor(u.wordsRead/100);
+  if(bookId){const b=this.books.find(x=>x.id===bookId);if(b)b.readWords=(b.readWords||0)+words}
+  this.save(LS_CURRENT,u);this.persistBook();this.updateStats();this.updateReaderProgress()
+ }
+ async nextPage(){
+  if(!this.currentBook)return;
+  if(this.currentBook.format==="txt"){if(this.currentParagraphIndex<this.currentBook.paragraphs.length-1){this.currentParagraphIndex++;this.currentBook.currentIndex=this.currentParagraphIndex;const words=this.countWords(this.currentBook.paragraphs[this.currentParagraphIndex]);if(!this.currentBook.readParagraphs?.includes(this.currentParagraphIndex)){this.currentBook.readParagraphs=this.currentBook.readParagraphs||[];this.currentBook.readParagraphs.push(this.currentParagraphIndex);this.addWordsRead(words,this.currentBook.id)}this.renderTXT()}}
+  else if(this.currentBook.format==="pdf")await this.renderPDFPage(this.pdfPageNum+1);
+  else if(this.epubRendition)await this.epubRendition.next();
+ }
+ async previousPage(){
+  if(!this.currentBook)return;
+  if(this.currentBook.format==="txt"){if(this.currentParagraphIndex>0){this.currentParagraphIndex--;this.currentBook.currentIndex=this.currentParagraphIndex;this.renderTXT()}}
+  else if(this.currentBook.format==="pdf")await this.renderPDFPage(this.pdfPageNum-1);
+  else if(this.epubRendition)await this.epubRendition.prev();
+ }
+ updateReaderProgress(){
+  const b=this.currentBook;if(!b)return;const p=this.getBookProgress(b);document.getElementById("reader-progress").style.width=p+"%";document.getElementById("reader-progress-label").textContent=p+"%";
+  const mod=(this.currentUser?.wordsRead||0)%100;document.getElementById("xp-progress").style.width=mod+"%";document.getElementById("xp-progress-label").textContent=mod+" / 100 words to next XP";
+ }
+ readerMeta(x){document.getElementById("reader-location").textContent=x;document.getElementById("reader-meta").textContent=(this.currentBook?.readWords||0).toLocaleString()+" words credited from this book"}
+ countWords(t){return (t||"").trim().split(/\s+/).filter(Boolean).length}
+ persistBook(){this.save(LS_BOOKS,this.books);if(this.currentBook)this.currentBookId=this.currentBook.id;this.renderLibrary()}
+ saveQuote(text){if(!text)return;if(this.quotes.some(q=>q.text===text&&q.bookTitle===this.currentBook.title)){this.toast("💬 Already in Quote Vault");return}this.quotes.unshift({id:Date.now(),text,bookTitle:this.currentBook.title,createdAt:Date.now()});this.save(LS_QUOTES,this.quotes);this.toast("💬 Quote saved!")}
+ openQuotes(){this.modal('<div class="modal-bg"><div class="modal glass"><div class="flex justify-between items-center"><h2 class="text-2xl font-black">💬 Quote Vault</h2><button class="btn" onclick="app.closeModal()">✕</button></div><div class="grid gap-3 mt-5">'+(this.quotes.length?this.quotes.map(q=>'<div class="glass2 rounded-2xl p-4"><div class="text-sm leading-7">“'+this.escape(q.text)+'”</div><div class="text-xs text-slate-500 mt-3">— '+this.escape(q.bookTitle)+'</div><button class="btn btn-danger mt-3" onclick="app.deleteQuote('+q.id+')">Delete</button></div>').join(""):'<div class="text-center text-slate-500 py-12">No quotes yet. Click a TXT paragraph while reading. ✨</div>')+'</div></div></div>')}
+ deleteQuote(id){this.quotes=this.quotes.filter(q=>q.id!==id);this.save(LS_QUOTES,this.quotes);this.openQuotes()}
+ openPaste(){this.modal('<div class="modal-bg"><div class="modal glass"><h2 class="text-2xl font-black">✍️ Paste Story / Light Novel</h2><input id="paste-title" class="input mt-5" placeholder="Book title"><textarea id="paste-text" class="input mt-3 min-h-[300px]" placeholder="Paste your story here..."></textarea><div class="flex justify-end gap-2 mt-4"><button class="btn" onclick="app.closeModal()">Cancel</button><button class="btn btn-accent" onclick="app.createPastedBook()">Create Book 🚀</button></div></div></div>')}
+ createPastedBook(){const title=document.getElementById("paste-title").value.trim()||"Untitled Story",text=document.getElementById("paste-text").value,paragraphs=text.split(/(?:\r?\n\s*){2,}/).map(x=>x.trim()).filter(Boolean);if(!paragraphs.length){this.toast("❌ Add some text first");return}this.books.unshift({id:"book_"+Date.now(),title,format:"txt",paragraphs,currentIndex:0,createdAt:Date.now(),readWords:0});this.save(LS_BOOKS,this.books);this.closeModal();this.renderLibrary();this.toast("📚 Story added")}
+ openAuth(){this.modal('<div class="modal-bg"><div class="modal glass max-w-lg"><h2 class="text-2xl font-black">👤 Account</h2><p class="text-sm text-slate-500 mt-1">Prototype-local account. Data stays in this browser.</p><input id="auth-name" class="input mt-5" placeholder="Username" value="'+this.escape(this.currentUser.username||"")+'"><input id="auth-pass" type="password" class="input mt-3" placeholder="Password"><div class="flex gap-2 mt-4"><button class="btn btn-accent flex-1" onclick="app.saveAccount()">Save Account</button><button class="btn" onclick="app.logoutGuest()">Guest</button></div></div></div>')}
+ saveAccount(){const name=document.getElementById("auth-name").value.trim()||"Reader_"+Math.floor(Math.random()*9999);this.currentUser.username=name;this.currentUser.guest=false;if(!this.users.some(u=>u.id===this.currentUser.id))this.users.push(this.currentUser);this.save(LS_USERS,this.users);this.save(LS_CURRENT,this.currentUser);this.closeModal();this.updateStats();this.toast("👤 Account updated")}
+ logoutGuest(){this.currentUser={id:"guest_"+Date.now(),username:"Guest",xp:0,wordsRead:0,guest:true};this.save(LS_CURRENT,this.currentUser);this.closeModal();this.updateStats()}
+ openLeaderboard(){const all=[...this.users,...(this.currentUser&&!this.currentUser.guest?[this.currentUser]:[])].filter((u,i,a)=>a.findIndex(x=>x.id===u.id)===i);const mock=[{username:"ReaderNova",wordsRead:127000},{username:"BookKnight",wordsRead:94000},{username:"PageMage",wordsRead:71000},{username:"NightOwl",wordsRead:42000}].map((u,i)=>({...u,id:"mock"+i,xp:Math.floor(u.wordsRead/100)}));all.push(...mock);all.sort((a,b)=>(b.xp||Math.floor((b.wordsRead||0)/100))-(a.xp||Math.floor((a.wordsRead||0)/100)));this.modal('<div class="modal-bg"><div class="modal glass"><div class="flex justify-between items-center"><h2 class="text-2xl font-black">🏆 Top Readers</h2><button class="btn" onclick="app.closeModal()">✕</button></div><div class="text-xs text-slate-500 mt-2">Local leaderboard + sample entries until a backend is connected.</div><div class="grid gap-2 mt-5">'+all.slice(0,10).map((u,i)=>'<div class="glass2 rounded-2xl p-3 flex items-center gap-3"><div class="w-9 h-9 rounded-full flex items-center justify-center font-black" style="background:'+(i<3?'var(--accent)':'#161d2d')+'">'+(i+1)+'</div><div class="flex-1"><div class="font-bold">'+this.escape(u.username)+'</div><div class="text-xs text-slate-500">'+(u.wordsRead||0).toLocaleString()+' words</div></div><div class="font-black">'+(u.xp||0)+' XP</div></div>').join("")+'</div></div></div>')}
+ openSettings(){this.modal('<div class="modal-bg"><div class="modal glass"><div class="flex justify-between items-center"><h2 class="text-2xl font-black">⚙️ App Settings</h2><button class="btn" onclick="app.closeModal()">✕</button></div><div class="mt-6"><label class="text-sm font-bold">Accent color</label><input id="accent-picker" class="w-full h-12 mt-2" type="color" value="'+this.prefs.accent+'"><div class="flex gap-2 mt-3">'+["#818cf8","#22d3ee","#34d399","#fb7185","#f59e0b"].map(c=>'<button class="w-10 h-10 rounded-full border border-white/10" style="background:'+c+'" onclick="app.setAccent(\''+c+'\')"></button>').join("")+'</div></div><div class="mt-6"><label class="text-sm font-bold">Brightness dimmer</label><input class="range mt-2" type="range" min="0" max="85" value="'+this.prefs.brightness+'" oninput="app.setBrightness(+this.value)"></div><div class="mt-6 flex justify-end"><button class="btn btn-accent" onclick="app.closeModal()">Done ✨</button></div></div></div>')}
+ openReaderSettings(){this.openSettings()}
+ setAccent(c){this.prefs.accent=c;this.save(LS_ACCENT,c);this.save(LS_PREFS,this.prefs);this.applyPrefs();this.toast("🎨 Accent updated")}
+ applyPrefs(){document.documentElement.style.setProperty("--accent",this.prefs.accent||"#818cf8");document.documentElement.style.setProperty("--accent-glow",this.hexToRgba(this.prefs.accent||"#818cf8",.28));document.documentElement.style.setProperty("--accent-border",this.hexToRgba(this.prefs.accent||"#818cf8",.42));this.setFontSize(this.prefs.fontSize||20);this.setFont(this.prefs.fontFamily||"Merriweather");this.setBrightness(this.prefs.brightness||0)}
+ hexToRgba(hex,a){let h=hex.replace("#","");if(h.length===3)h=h.split("").map(x=>x+x).join("");const n=parseInt(h,16);return`rgba(${n>>16},${n>>8&255},${n&255},${a})`}
+ setBrightness(v){this.prefs.brightness=v;document.getElementById("brightness-overlay").style.opacity=v/100;this.save(LS_PREFS,this.prefs)}
+ changeFontSize(d){this.setFontSize(Math.min(32,Math.max(14,(this.prefs.fontSize||20)+d)))}
+ setFontSize(v){v=Math.min(32,Math.max(14,v));this.prefs.fontSize=v;document.documentElement.style.setProperty("--reader-size",v+"px");const r=document.getElementById("font-range");if(r)r.value=v;const l=document.getElementById("font-size-label");if(l)l.textContent=v+"px";this.save(LS_PREFS,this.prefs)}
+ setFont(v){this.prefs.fontFamily=v;document.documentElement.style.setProperty("--reader-font",'\"'+v+'\",serif');document.querySelectorAll(".reader-text").forEach(x=>x.style.fontFamily='"'+v+'",serif');const s=document.getElementById("font-family");if(s)s.value=v;this.save(LS_PREFS,this.prefs)}
+ refreshVoices(){const s=document.getElementById("voice-select");if(!s)return;const voices=speechSynthesis.getVoices();s.innerHTML=voices.map((v,i)=>'<option value="'+i+'">'+this.escape(v.name)+' — '+this.escape(v.lang)+'</option>').join("")}
+ setSpeechRate(v){this.speechRate=v;this.prefs.speechRate=v;document.getElementById("speed-label").textContent=v.toFixed(1)+"×";this.save(LS_PREFS,this.prefs)}
+ speakCurrent(){
+  if(!this.currentBook||this.currentBook.format!=="txt"){this.toast("🔊 Voice reading is currently optimized for TXT.");return}
+  const text=this.currentBook.paragraphs[this.currentParagraphIndex];if(!text)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=this.speechRate;const voices=speechSynthesis.getVoices(),idx=+document.getElementById("voice-select").value;if(voices[idx])u.voice=voices[idx];u.onstart=()=>document.getElementById("speech-status").textContent="🔊 Reading…";u.onend=()=>{document.getElementById("speech-status").textContent="Finished";if(this.currentParagraphIndex<this.currentBook.paragraphs.length-1)this.nextPage()};u.onerror=()=>document.getElementById("speech-status").textContent="Voice error";speechSynthesis.speak(u)}
+ pauseSpeech(){if(speechSynthesis.speaking){speechSynthesis.paused?speechSynthesis.resume():speechSynthesis.pause();document.getElementById("speech-status").textContent=speechSynthesis.paused?"⏸️ Paused":"🔊 Reading…"}}
+ stopSpeech(){speechSynthesis.cancel();const s=document.getElementById("speech-status");if(s)s.textContent="Idle"}
+ playAmbient(mode){this.stopAmbient();if(mode==="off"){this.toast("🔇 Ambient off");return}this.toast(mode==="rain"?"🌧️ Rain mode selected":"🔥 Ambient mode selected");this.startAmbient(mode)}
+ startAmbient(mode){
+  try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;this.ambientCtx=new C();const o=this.ambientCtx.createOscillator(),g=this.ambientCtx.createGain();o.frequency.value=mode==="space"?110:mode==="fire"?55:35;g.gain.value=.018;o.connect(g);g.connect(this.ambientCtx.destination);o.start();this.ambientSource=o}catch{}}
+ stopAmbient(){try{this.ambientSource?.stop()}catch{}this.ambientSource=null;try{this.ambientCtx?.close()}catch{}this.ambientCtx=null}
+ toggleFullscreen(){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.()}
+ bindKeys(){document.addEventListener("keydown",e=>{if(document.getElementById("reader-view").classList.contains("hidden"))return;if(e.key==="ArrowRight")this.nextPage();if(e.key==="ArrowLeft")this.previousPage();if(e.code==="Space"&&document.activeElement.tagName!=="INPUT"&&document.activeElement.tagName!=="TEXTAREA"){e.preventDefault();this.pauseSpeech()}})}
+ modal(html){document.getElementById("modal-root").innerHTML=html}
+ closeModal(){document.getElementById("modal-root").innerHTML=""}
+ escape(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+}
+async function db(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,1);r.onupgradeneeded=()=>r.result.createObjectStore(DB_STORE);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function dbPut(k,v){const d=await db();return new Promise((res,rej)=>{const t=d.transaction(DB_STORE,"readwrite");t.objectStore(DB_STORE).put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
+async function dbGet(k){const d=await db();return new Promise((res,rej)=>{const t=d.transaction(DB_STORE,"readonly");const r=t.objectStore(DB_STORE).get(k);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function dbDelete(k){const d=await db();return new Promise((res,rej)=>{const t=d.transaction(DB_STORE,"readwrite");t.objectStore(DB_STORE).delete(k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
+
+const app=new EReaderApp();
+window.app=app;
+</script>
 </body>
 </html>
